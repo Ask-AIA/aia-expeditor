@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# AIA Expeditor
+!.env.example
+storage/
+eval/results/*.tmp
+docs/MUSE_CODE_SPEC.md
