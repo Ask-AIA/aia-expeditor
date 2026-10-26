@@ -153,3 +153,7 @@ vite.config.ts.timestamp-*
 storage/
 eval/results/*.tmp
 docs/MUSE_CODE_SPEC.md
+
+# Local-only
+.DS_Store
+lefthook-local.yml

@@ -1,0 +1,43 @@
+{
+  "name": "aia-expeditor",
+  "version": "0.0.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --if-present dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "eslint . --ignore-pattern 'tools/lint-fixtures/**' && prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml,css,html}\"",
+    "lint:boundaries-test": "node tools/lint-fixtures/verify-boundaries.mjs",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "setup": "node -e \"console.log('setup wizard: not implemented yet (Phase 4)')\"",
+    "doctor": "node -e \"console.log('doctor: not implemented yet (Phase 4)')\"",
+    "eval": "node -e \"console.log('eval harness: not implemented yet (Phase 11)')\"",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "globals": "14.0.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-boundaries": "7.3.0",
+    "lefthook": "2.2.2",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.72.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,cts}": [
+      "eslint --fix --ignore-pattern 'tools/lint-fixtures/**'",
+      "prettier --write"
+    ],
+    "*.{js,mjs,cjs,json,md,yml,yaml,css,html}": [
+      "prettier --write"
+    ]
+  }
+}
