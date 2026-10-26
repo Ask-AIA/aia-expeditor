@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+coverage
+pnpm-lock.yaml
+storage
+eval/results
+*.tsbuildinfo
+.git
+# Frozen by task setup: must not be modified (see phase constraints).
+README.md
+AGENTS.md
+LICENSE
+docs/MUSE_CODE_SPEC.md
