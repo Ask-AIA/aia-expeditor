@@ -1,0 +1,8 @@
+title = "AIA Expeditor gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Example env file holds placeholders only, never real secrets"
+paths = [".env.example"]

@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: true
+  commands:
+    gitleaks:
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks protect --staged --config .gitleaks.toml --verbose
+        else
+          echo "gitleaks is not installed; skipping secret scan (install with: brew install gitleaks)"
+        fi
+    lint-staged:
+      run: pnpm exec lint-staged
+      stage_fixed: true
