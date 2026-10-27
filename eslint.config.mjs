@@ -55,6 +55,9 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/ban-ts-comment': 'error',
+      // Template-method hooks and Nest handlers legitimately receive params they
+      // ignore; the `^_` marker keeps that explicit.
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       // NestJS modules are empty classes whose behavior comes from decorators.
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
     },
@@ -71,8 +74,14 @@ export default tseslint.config(
           extensions: ['.ts', '.tsx', '.mts', '.cts', '.js', '.mjs', '.cjs', '.jsx', '.json'],
         },
       },
+      // `kernel` is the shared framework-free vocabulary (Entity, Result,
+      // DomainError, branded IDs, ports like LoggerPort): every layer may use
+      // it, but it may use nothing. It is split from `domain` so the HTTP
+      // layer can map DomainError to problem+json (spec §4 puts the exception
+      // filter in presentation) without opening business-domain internals.
       'boundaries/elements': [
-        { type: 'domain', pattern: ['**/domain/**', '**/shared/kernel/**'] },
+        { type: 'domain', pattern: ['**/domain/**'] },
+        { type: 'kernel', pattern: ['**/shared/kernel/**'] },
         { type: 'application', pattern: ['**/application/**'] },
         { type: 'infrastructure', pattern: ['**/infrastructure/**'] },
         { type: 'presentation', pattern: ['**/presentation/**'] },
@@ -83,7 +92,7 @@ export default tseslint.config(
         'error',
         {
           default: 'allow',
-          // External targets must be evaluated so `domain` can ban them.
+          // External targets must be evaluated so `domain`/`kernel` can ban them.
           checkAllOrigins: true,
           policies: [
             {
@@ -98,34 +107,49 @@ export default tseslint.config(
               message: 'domain must not depend on other layers (spec §5.2)',
             },
             {
+              from: { element: { type: 'kernel' } },
+              disallow: { to: { module: { origin: 'external' } } },
+              message:
+                'kernel must be framework-free: external packages are not allowed here (spec §5.2)',
+            },
+            {
+              from: { element: { type: 'kernel' } },
+              disallow: { to: { element: { type: '!kernel' }, module: { origin: 'local' } } },
+              message: 'kernel must not depend on other layers (spec §5.2)',
+            },
+            {
               from: { element: { type: 'application' } },
               disallow: {
                 to: {
-                  element: { types: { noneOf: ['domain', 'application'] } },
+                  element: { types: { noneOf: ['domain', 'kernel', 'application'] } },
                   module: { origin: 'local' },
                 },
               },
-              message: 'application may only depend on domain (spec §5.2)',
+              message: 'application may only depend on domain and kernel (spec §5.2)',
             },
             {
               from: { element: { type: 'infrastructure' } },
               disallow: {
                 to: {
-                  element: { types: { noneOf: ['domain', 'application', 'infrastructure'] } },
+                  element: {
+                    types: { noneOf: ['domain', 'kernel', 'application', 'infrastructure'] },
+                  },
                   module: { origin: 'local' },
                 },
               },
-              message: 'infrastructure may only depend on application and domain (spec §5.2)',
+              message:
+                'infrastructure may only depend on application, domain and kernel (spec §5.2)',
             },
             {
               from: { element: { type: 'presentation' } },
               disallow: {
                 to: {
-                  element: { types: { noneOf: ['application', 'presentation'] } },
+                  element: { types: { noneOf: ['kernel', 'application', 'presentation'] } },
                   module: { origin: 'local' },
                 },
               },
-              message: 'presentation may only depend on application (spec §5.2)',
+              message:
+                'presentation may only depend on application and kernel (spec §5.2; kernel holds DomainError and shared IDs)',
             },
           ],
         },
