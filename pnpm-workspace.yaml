@@ -5,8 +5,12 @@ packages:
   - 'spikes'
 allowBuilds:
   '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
   esbuild: true
   lefthook: true
+  prisma: true
   sharp: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
