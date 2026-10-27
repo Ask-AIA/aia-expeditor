@@ -9,31 +9,272 @@
     "audioFormatTag": 65534,
     "durationSec": 8.4253125
   },
-  "ffmpegAvailable": false,
-  "realtime": {
-    "connected": false,
-    "handshakeMs": null,
-    "sentChunks": 0,
-    "eosSignal": "json {type:end_of_stream} + socket close (write end)",
-    "seen": [],
-    "firstPartialMs": null,
-    "finalMs": null,
-    "transcript": null,
-    "detectedLanguage": null,
-    "error": "getaddrinfo ENOTFOUND api.meta.ai"
-  },
+  "resampledToHz": 24000,
+  "frameBytes": 4800,
+  "referenceText": "Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?",
+  "runs": [
+    {
+      "label": "no-bias",
+      "connected": true,
+      "handshakeMs": 4592,
+      "sessionId": "voyager/duplex/CA72C0AEF5AD4BB5AE677990A3722FD7",
+      "sentChunks": 85,
+      "audioBytes": 404416,
+      "seen": [
+        {
+          "atMs": 4592,
+          "excerpt": "{\"sessionId\":\"voyager/duplex/CA72C0AEF5AD4BB5AE677990A3722FD7\"}"
+        },
+        {
+          "atMs": 5940,
+          "excerpt": "{\"type\":\"speechStart\",\"audioProcessedMs\":620,\"turnId\":0}"
+        },
+        {
+          "atMs": 6965,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya\",\"final\":false,\"audioProcessedMs\":2160}"
+        },
+        {
+          "atMs": 7159,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí\",\"final\":false,\"audioProcessedMs\":2400}"
+        },
+        {
+          "atMs": 7555,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las\",\"final\":false,\"audioProcessedMs\":2720}"
+        },
+        {
+          "atMs": 7743,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos\",\"final\":false,\"audioProcessedMs\":2960}"
+        },
+        {
+          "atMs": 8071,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de\",\"final\":false,\"audioProcessedMs\":3280}"
+        },
+        {
+          "atMs": 8253,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo\",\"final\":false,\"audioProcessedMs\":3440}"
+        },
+        {
+          "atMs": 8357,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y\",\"final\":false,\"audioProcessedMs\":3520}"
+        },
+        {
+          "atMs": 8453,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una\",\"final\":false,\"audioProcessedMs\":3680}"
+        },
+        {
+          "atMs": 8777,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz.\",\"final\":false,\"audioProcessedMs\":4000}"
+        },
+        {
+          "atMs": 9060,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me\",\"final\":false,\"audioProcessedMs\":4240}"
+        },
+        {
+          "atMs": 9370,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan\",\"final\":false,\"audioProcessedMs\":4560}"
+        },
+        {
+          "atMs": 9461,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los\",\"final\":false,\"audioProcessedMs\":4640}"
+        },
+        {
+          "atMs": 9979,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores\",\"final\":false,\"audioProcessedMs\":5200}"
+        },
+        {
+          "atMs": 10169,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y\",\"final\":false,\"audioProcessedMs\":5360}"
+        },
+        {
+          "atMs": 10373,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro\",\"final\":false,\"audioProcessedMs\":5520}"
+        },
+        {
+          "atMs": 10464,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro\",\"final\":false,\"audioProcessedMs\":5680}"
+        },
+        {
+          "atMs": 10792,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos.\",\"final\":false,\"audioProcessedMs\":5920}"
+        },
+        {
+          "atMs": 11098,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas\",\"final\":false,\"audioProcessedMs\":6240}"
+        },
+        {
+          "atMs": 11908,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas ensaladas\",\"final\":false,\"audioProcessedMs\":7040}"
+        },
+        {
+          "atMs": 12204,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas ensaladas llevaste\",\"final\":false,\"audioProcessedMs\":7360}"
+        },
+        {
+          "atMs": 12301,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas ensaladas llevaste pedido?\",\"final\":false,\"audioProcessedMs\":7440}"
+        },
+        {
+          "atMs": 12391,
+          "excerpt": "{\"type\":\"speechEnd\",\"audioProcessedMs\":7020,\"turnId\":0}"
+        },
+        {
+          "atMs": 12391,
+          "excerpt": "{\"type\":\"speechComplete\",\"audioProcessedMs\":7020,\"turnId\":0,\"transcript\":\"Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas ensaladas llevaste pedido?\"}"
+        },
+        {
+          "atMs": 13431,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"\",\"final\":true,\"audioProcessedMs\":8480}"
+        }
+      ],
+      "partialCount": 21,
+      "firstPartialMs": 2272,
+      "speechCompleteMs": 7699,
+      "closeMs": 8741,
+      "closeCode": 1000,
+      "closeReason": "No more transcript segments",
+      "transcript": "Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro cuatro vasos. ¿Cuántas ensaladas llevaste pedido?",
+      "error": null,
+      "wer": {
+        "wer": 0.125,
+        "errors": 3,
+        "referenceWords": 24,
+        "hypothesisWords": 24
+      },
+      "languageBias": [],
+      "keywords": []
+    },
+    {
+      "label": "es-bias",
+      "connected": true,
+      "handshakeMs": 3112,
+      "sessionId": "voyager/duplex/226AD26FE3B14BF798BEE03FD7617B21",
+      "sentChunks": 85,
+      "audioBytes": 404416,
+      "seen": [
+        {
+          "atMs": 3112,
+          "excerpt": "{\"sessionId\":\"voyager/duplex/226AD26FE3B14BF798BEE03FD7617B21\"}"
+        },
+        {
+          "atMs": 4349,
+          "excerpt": "{\"type\":\"speechStart\",\"audioProcessedMs\":540,\"turnId\":0}"
+        },
+        {
+          "atMs": 5077,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo,\",\"final\":false,\"audioProcessedMs\":1760}"
+        },
+        {
+          "atMs": 5359,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya\",\"final\":false,\"audioProcessedMs\":2080}"
+        },
+        {
+          "atMs": 5774,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí\",\"final\":false,\"audioProcessedMs\":2480}"
+        },
+        {
+          "atMs": 5870,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las\",\"final\":false,\"audioProcessedMs\":2560}"
+        },
+        {
+          "atMs": 6163,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos\",\"final\":false,\"audioProcessedMs\":2880}"
+        },
+        {
+          "atMs": 6485,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas\",\"final\":false,\"audioProcessedMs\":3200}"
+        },
+        {
+          "atMs": 6779,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de\",\"final\":false,\"audioProcessedMs\":3440}"
+        },
+        {
+          "atMs": 6870,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo\",\"final\":false,\"audioProcessedMs\":3600}"
+        },
+        {
+          "atMs": 7078,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y\",\"final\":false,\"audioProcessedMs\":3760}"
+        },
+        {
+          "atMs": 7186,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un\",\"final\":false,\"audioProcessedMs\":3840}"
+        },
+        {
+          "atMs": 7386,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz.\",\"final\":false,\"audioProcessedMs\":4080}"
+        },
+        {
+          "atMs": 7789,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me\",\"final\":false,\"audioProcessedMs\":4480}"
+        },
+        {
+          "atMs": 8204,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los\",\"final\":false,\"audioProcessedMs\":4880}"
+        },
+        {
+          "atMs": 8718,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y\",\"final\":false,\"audioProcessedMs\":5360}"
+        },
+        {
+          "atMs": 8895,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro\",\"final\":false,\"audioProcessedMs\":5520}"
+        },
+        {
+          "atMs": 9306,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos.\",\"final\":false,\"audioProcessedMs\":5840}"
+        },
+        {
+          "atMs": 9810,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas\",\"final\":false,\"audioProcessedMs\":6480}"
+        },
+        {
+          "atMs": 10543,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva\",\"final\":false,\"audioProcessedMs\":7200}"
+        },
+        {
+          "atMs": 10701,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este\",\"final\":false,\"audioProcessedMs\":7360}"
+        },
+        {
+          "atMs": 10830,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?\",\"final\":false,\"audioProcessedMs\":7440}"
+        },
+        {
+          "atMs": 10830,
+          "excerpt": "{\"type\":\"speechEnd\",\"audioProcessedMs\":6940,\"turnId\":0}"
+        },
+        {
+          "atMs": 10830,
+          "excerpt": "{\"type\":\"speechComplete\",\"audioProcessedMs\":6940,\"turnId\":0,\"transcript\":\"Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?\"}"
+        },
+        {
+          "atMs": 11949,
+          "excerpt": "{\"type\":\"transcript\",\"transcript\":\"\",\"final\":true,\"audioProcessedMs\":8480}"
+        }
+      ],
+      "partialCount": 20,
+      "firstPartialMs": 1864,
+      "speechCompleteMs": 7617,
+      "closeMs": 8739,
+      "closeCode": 1000,
+      "closeReason": "No more transcript segments",
+      "transcript": "Listo, ya metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?",
+      "error": null,
+      "wer": {
+        "wer": 0.08333333333333333,
+        "errors": 2,
+        "referenceWords": 24,
+        "hypothesisWords": 23
+      },
+      "languageBias": ["es"],
+      "keywords": ["bandejas", "tenedores", "vasos", "ensaladas"]
+    }
+  ],
   "file": {
     "httpStatus": 400,
-    "latencyMs": 252,
+    "latencyMs": 2117,
     "transcript": null,
-    "detectedLanguage": null,
-    "excerpt": "{\"sessionId\":\"voyager/transcribe/4427C518A19F46B5AB584C5A4A27E698\",\"error\":{\"code\":null,\"param\":null,\"type\":\"invalid_request_error\",\"message\":\"Malformed request\"}}"
-  },
-  "referenceText": "Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?",
-  "wer": {
-    "wer": 1,
-    "errors": 24,
-    "referenceWords": 24,
-    "hypothesisWords": 0
+    "excerpt": "{\"sessionId\":\"voyager/transcribe/4E87032A9B984E07A9FC870E07751F66\",\"error\":{\"code\":null,\"param\":null,\"type\":\"invalid_request_error\",\"message\":\"Malformed request\"}}",
+    "note": "not needed: realtime works"
   }
 }

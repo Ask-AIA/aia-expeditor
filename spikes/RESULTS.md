@@ -18,14 +18,18 @@ Environment notes (no secrets below — keys are only ever read through
 - Sandbox limitation: the `tsx` CLI cannot open its IPC pipe here
   (`listen EPERM`), so runs used `node --import tsx/esm` on the same files.
   Committed scripts keep `tsx` (works outside the sandbox).
-- Sandbox limitation 2: raw sockets fail DNS (`getaddrinfo ENOTFOUND`
-  from the `ws` package) while `fetch` works. The STT realtime socket could
-  therefore not be tested from here — recorded as UNTESTED, not as failed.
+- Sandbox network is proxy-only: raw `ws` DNS fails here while `fetch`
+  works. `spikes/04-stt.ts` therefore passes an `HttpsProxyAgent` (new
+  spikes devDependency) to `ws` when `HTTPS_PROXY`/`https_proxy` is set,
+  and connects directly otherwise — the STT realtime socket was tested
+  for real through the proxy. Proxy handshakes measured 3.1–5.6 s
+  (~400 ms direct per the manual run); one run transiently lost a socket
+  at DNS (close 1006) while an identical config succeeded minutes apart.
 - No usage/pricing fields were returned by any Meta endpoint, and no token
   counts were observed in SSE events. Cost tracking stays call-count based
   (`ProviderCallLog`) against the $150 credits (§24 row 8).
 - Secret scan: `grep -ri 'bearer|sk-|xi-api-key' spikes/fixtures/` is clean;
-  `calls.jsonl` (35 lines) carries model/endpoint/status/latency only.
+  `calls.jsonl` (44 lines) carries model/endpoint/status/latency only.
 
 ## Spike 1 — SAM 3.1 (`spikes/01-sam.ts`) — OK
 
@@ -144,7 +148,7 @@ Verdict: scale-display reading is reliable on this shot (§24 row 6
 CONFIRMED for the tested angle). Keep the second-angle/manual-entry
 fallback for unreadable cases — one photo cannot prove the overhead angle.
 
-## Spike 4 — Spanish STT (`spikes/04-stt.ts`) — PARTIAL (no transcript yet)
+## Spike 4 — Spanish STT (`spikes/04-stt.ts`) — OK (realtime CONFIRMED)
 
 Input: `spikes/inputs/es-10s.wav` — 273,706 bytes; header walk finds the
 `data` chunk at offset 4096 (JUNK-padded, `WAVE_FORMAT_EXTENSIBLE` tag
@@ -153,20 +157,58 @@ Input: `spikes/inputs/es-10s.wav` — 273,706 bytes; header walk finds the
 tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?"
 WER is computed normalized (lowercase, punctuation stripped).
 
-Realtime `wss://api.meta.ai/v1/asr/realtime`: UNTESTED from this sandbox —
-the `ws` client fails at DNS (`getaddrinfo ENOTFOUND`, socket closed 1006,
-0 messages, `connected=false`). `fetch` to the same host works, so this is
-an environment restriction, not a server verdict. The spike streams 20 ms
-PCM frames (640 bytes, real-time paced) and signals end-of-utterance with
-a JSON `{type:"end_of_stream"}` text frame followed by socket close — that
-choice is still guesswork (marked `// VERIFY` for Phase 8). Handshake time,
-first-partial/final latencies, message shapes, and language detection are
-all unobserved. Attempts saved to `fixtures/stt/result.json`.
+Follow-up run 2026-10-26 (`pnpm spike:4`, live through the sandbox proxy):
+realtime `wss://api.meta.ai/v1/asr/realtime` works with the confirmed
+protocol — no auth header (the `ws` package; Node's global WebSocket
+failed with close 1006 on this endpoint), first client frame
+`{"mode":"ENDPOINTING","authorization":{"accessToken":"…"},
+"audioEncoding":"PCM_24KHZ","model":"muse-voice-transcribe-1.0",
+"partialMode":"CUMULATIVE","emitAudioProgress":false,
+"languageBias":[…],"keywords":[…]}`; audio starts only after the
+`{sessionId}` reply (a `type:"error"` reply means the handshake failed);
+raw PCM16 mono 24 kHz in 4,800-byte (100 ms) binary frames paced in real
+time (the 16 kHz input is resampled in Node with linear interpolation,
+header stripped by RIFF chunk walk); end with `{"type":"endStream"}`;
+the server closes `1000 "No more transcript segments"`.
+
+Observed event sequence per run: `{sessionId}` → `speechStart` → 20–21
+CUMULATIVE `transcript` partials (growing text; a last `final:true`
+arrives with empty text) → `speechEnd` → `speechComplete {transcript}`
+(the final utterance text) → close 1000. Two spike bugs found and fixed
+the same day: the first version kept the FIRST partial as the running
+transcript instead of the latest, and typed `turnId` as string-only
+(the server sends number `0`), which dropped `speechEnd`/`speechComplete`
+from Zod parsing.
+
+Two runs, same 8.4 s input, full runs saved to `fixtures/stt/result.json`
+with per-run latencies in `calls.jsonl` (never the key):
+
+- no-bias (`languageBias:[]`, `keywords:[]`): "Listo, ya metí las dos
+  bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro
+  cuatro vasos. ¿Cuántas ensaladas llevaste pedido?" → WER 0.125 (3/24:
+  duplicated "cuatro"; "llevaste pedido" vs "lleva este pedido").
+  Handshake 4,592 ms, first partial 2,272 ms, `speechComplete` 7,699 ms,
+  close 8,741 ms (audio-start based).
+- es-bias (`languageBias:["es"]`,
+  `keywords:["bandejas","tenedores","vasos","ensaladas"]`): "Listo, ya
+  metí las dos bandejas de pollo y un arroz. Me faltan los tenedores y
+  cuatro vasos. ¿Cuántas ensaladas lleva este pedido?" → WER 0.083
+  (2/24: "un arroz" vs "una de arroz"). Handshake 3,112 ms, first
+  partial 1,864 ms, `speechComplete` 7,617 ms, close 8,739 ms.
+
+So: first partial ≈ 2 s after the audio starts, partials trail the audio
+by ~0.2–0.5 s, `speechComplete` ≈ 0.7 s after the speech ends
+(`audioProcessedMs` ≈ 6.9 s). Handshakes are proxy-inflated here (~400 ms
+direct per the manual run). This run's no-bias transcript beat the manual
+run's poor no-bias one ("…dobandada…"), so quality varies run to run;
+the es-bias transcript matches the manual run's (one small error).
+Per the manual run, `"spanish"` and `"es-US"` performed slightly worse
+than `"es"`.
 
 File `POST /v1/asr/transcribe` (Bearer auth accepted — errors are
-400-shape validation, never 401): the server's own errors mapped the
-partial shape over 6 probe rounds (each logged to `calls.jsonl` only via
-the 3 baked-in attempts; probes were throwaway scripts under `/tmp`):
+400-shape validation, never 401): earlier, the server's own errors had
+mapped the partial shape over 6 probe rounds (probes were throwaway
+scripts under `/tmp`):
 
 1. `file` + `model` + `language` parts → 400 (568 ms):
    `"Both a 'request' and an 'audio' part are required"`.
@@ -180,17 +222,21 @@ field`, proving `request` is parsed as JSON with camelCase keys).
    `"Malformed request"` (252–6,542 ms; the ~6 s ones suggest the server
    got as far as audio processing before rejecting).
 
-So: endpoint exists, auth works, part names (`request`+`audio`) and the
-camelCase `audioEncoding` requirement are CONFIRMED, but the full request
-schema (and/or audio-container expectations) stays unresolved. No
-transcript → WER 1.000 (24/24) against the reference; detected language
-unobserved. EOU signaling, partial/final shapes, and latencies unobserved.
+File `POST /v1/asr/transcribe`: retained as one `request`+`audio`
+attempt → still 400 `"Malformed request"` (2,117 ms) — not needed,
+realtime works. The earlier probes had mapped the partial shape
+(`request` + `audio` parts, camelCase `audioEncoding`) over 6 rounds.
 
-Verdict: §24 row 4 stays on its fallback (file endpoint on VAD-segmented
-utterances — whose exact shape is now narrower but still open), fixed
-`es` per station until language detection is observed. Realtime + the
-remaining file-endpoint fields are Phase 5/8 work, preferably retested
-outside this sandbox.
+Flakiness notes: one intermediate run lost its second socket at DNS
+(close 1006, 90 s overall timeout) while an identical config succeeded
+minutes apart; one sandbox file fetch stalled 301 s before failing.
+Client hardening from this: `socket.terminate()` (not `close()`) on
+teardown so a dead socket cannot keep the process alive, and a 30 s
+timeout on the file fetch.
+
+Verdict: §24 row 4 CONFIRMED. Fixed `languageBias:["es"]` per station +
+`keywords` from the catalog item names; no language auto-detection (no
+detected language is returned).
 
 ## Spike 5 — Baseten (`spikes/05-baseten.ts`) — SKIPPED
 
@@ -208,14 +254,14 @@ saves MP3 to `fixtures/tts/sample-es.mp3`, and reports TTFB + total.
 
 ## Summary table (final full run)
 
-| spike       | status           | key evidence                                                                                               |
-| ----------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| 01-sam      | OK               | 24/24 HTTP 200; p50 1,253 ms, max 6,927 ms; counts err ≤ 1 except 02-fork −3, 03-cup −4 (lidded); 05 exact |
-| 02-identify | OK               | `text.format`+`json_schema` works first try; cup 0.99; 3.0 s                                               |
-| 03-display  | OK               | 5/5 `1.24kg`; p50 2,583 ms, max 3,509 ms; err 0                                                            |
-| 04-stt      | ERROR (recorded) | realtime untested (sandbox); file shape narrowed to `request`+`audio`+`audioEncoding`, still 400s; WER 1.0 |
-| 05-baseten  | SKIPPED          | keys empty                                                                                                 |
-| 06-tts      | SKIPPED          | keys empty                                                                                                 |
+| spike       | status  | key evidence                                                                                                          |
+| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
+| 01-sam      | OK      | 24/24 HTTP 200; p50 1,253 ms, max 6,927 ms; counts err ≤ 1 except 02-fork −3, 03-cup −4 (lidded); 05 exact            |
+| 02-identify | OK      | `text.format`+`json_schema` works first try; cup 0.99; 3.0 s                                                          |
+| 03-display  | OK      | 5/5 `1.24kg`; p50 2,583 ms, max 3,509 ms; err 0                                                                       |
+| 04-stt      | OK      | realtime 2/2 close 1000; WER 0.125 no-bias, 0.083 es-bias; first partial ~2 s, complete ~7.7 s; file 400 (not needed) |
+| 05-baseten  | SKIPPED | keys empty                                                                                                            |
+| 06-tts      | SKIPPED | keys empty                                                                                                            |
 
 ## VERIFY + §24 resolutions
 
@@ -224,7 +270,7 @@ saves MP3 to `fixtures/tts/sample-es.mp3`, and reports TTFB + total.
 | V1/§24-1 | SAM base85 alphabet + bit packing           | DIFFERENT: alphabet is a custom 85-char set (recorded exactly; closest Z85 Δ3 `'`, `_`, backtick); `!`=`one_bit`, `~`=`lossless` confirmed; packing is not plain base85-of-bitmap → fallback: boxes+confidences for overlays, mask decode deferred |
 | V2/§24-2 | SAM latency per image per concept           | CONFIRMED: p50 ≈ 1.25 s, max ≈ 6.9 s (cold); parallelize ≤4 concepts/frame; stage-photo fallback stays                                                                                                                                             |
 | V3/§24-3 | Muse Spark structured-output field          | CONFIRMED: `text.format` + `json_schema` (+ `strict`) on Responses                                                                                                                                                                                 |
-| V4/§24-4 | STT realtime + language detection           | OPEN: realtime untested (sandbox); file shape narrowed (`request`+`audio`, camelCase `audioEncoding`) but unresolved → fallback stands, fixed `es` per station                                                                                     |
+| V4/§24-4 | STT realtime + language detection           | CONFIRMED: realtime handshake/audio/`endStream`/events live (2/2 close 1000); es-bias WER 0.083 → fixed `languageBias` per station + catalog `keywords`; no auto-detection (nothing returned)                                                      |
 | V5/§24-5 | Baseten endpoint for `muse-spark-open-1026` | UNTESTED (no keys) → fallback chosen: Meta API only                                                                                                                                                                                                |
 | §24-6    | Scale displays from overhead                | CONFIRMED on tested shot (5/5 exact); fallback stays for unreadable cases                                                                                                                                                                          |
 | §24-7    | Covered trays                               | OBSERVED: lidded cups missed by `cup` (0/4) while trays found 2/2 → capture-before-lidding + lid-label reading stays the plan                                                                                                                      |
@@ -240,8 +286,12 @@ saves MP3 to `fixtures/tts/sample-es.mp3`, and reports TTFB + total.
    decode attempts → boxes+confidences now, mask decode in Phase 5.
 3. §10.2 Muse Spark: `text.format` + `json_schema` confirmed (kept
    prompt-JSON+Zod+repair as fallback).
-4. §10.2 STT: recorded `request`+`audio` parts and `audioEncoding`
-   requirement; realtime handshake/message shapes still VERIFY for Phase 8.
+4. §10.2 STT: realtime protocol CONFIRMED (token handshake JSON,
+   24 kHz PCM16 100 ms frames, `endStream`, event names, per-station
+   `languageBias` + catalog `keywords`, no auto-detection); file endpoint
+   kept as not-needed (`request`+`audio`, still 400s). §13 updated to match.
+   Also §10.1 `SpeechToTextPort`: 24 kHz + bias/keywords instead of
+   `language` + auto-detection.
 5. §10.3 Baseten: still VERIFY (untested); Meta-only default confirmed.
 6. §11.2: added measured SAM numbers (p50 ≈ 1.25 s/concept) under the
    existing targets.

@@ -1,15 +1,21 @@
 /**
  * Spike 4 — transcribe `es-10s.wav` with `muse-voice-transcribe-1.0`.
  *
- * Tries the realtime WebSocket (`wss://…/v1/asr/realtime`, PCM16 mono
- * 16 kHz chunks) and the file endpoint (`POST /v1/asr/transcribe`).
- * Records handshake, auth, message shapes, end-of-utterance behavior,
- * language detection, latencies, and the word error rate against the
- * reference transcript from the task brief.
+ * Uses the realtime WebSocket (`wss://…/v1/asr/realtime`) with the protocol
+ * confirmed by a manual run on 2026-10-26: the first client frame is text
+ * JSON carrying the access token, audio starts only after the server replies
+ * `{sessionId}`, audio is raw PCM16 mono 24 kHz in 4,800-byte (100 ms)
+ * binary frames paced in real time, and the stream ends with the text frame
+ * `{"type":"endStream"}` (server then closes `1000 "No more transcript
+ * segments"`). Runs twice — with and without `languageBias`/`keywords` —
+ * and reports the WER of each against the reference text.
+ *
+ * The file endpoint (`POST /v1/asr/transcribe`) is kept as one attempt but
+ * marked "not needed: realtime works".
  */
-import { execFile } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import WebSocket from 'ws';
 import { z } from 'zod';
 import { getEnv, missingEnv, REPO_ROOT } from './lib/env.js';
@@ -18,11 +24,15 @@ import { appendCall, FIXTURES_DIR, logInfo } from './lib/log.js';
 import { isDirectRun, printSkipped } from './lib/run.js';
 import type { SpikeResult } from './lib/run.js';
 import { wordErrorRate } from './lib/wer.js';
+import type { WerResult } from './lib/wer.js';
 
 const SPIKE = '04-stt';
 const REFERENCE_TEXT =
   'Listo, ya metí las dos bandejas de pollo y una de arroz. ' +
   'Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?';
+
+/** Keywords for the biased run: catalog item names from the reference text. */
+const KEYWORDS = ['bandejas', 'tenedores', 'vasos', 'ensaladas'];
 
 const EnvSchema = z.object({
   baseUrl: z.string().min(1),
@@ -84,8 +94,31 @@ function findPcmData(buffer: Buffer): { pcm: Buffer; offset: number } | null {
 }
 
 /**
+ * Resample PCM16 mono from 16 kHz to 24 kHz with linear interpolation.
+ * Good enough for the spike; the server requires 24 kHz input.
+ */
+function resample16kTo24k(pcm16k: Buffer): Buffer {
+  const inSamples = Math.floor(pcm16k.length / 2);
+  if (inSamples === 0) return Buffer.alloc(0);
+  const view = new DataView(pcm16k.buffer, pcm16k.byteOffset, inSamples * 2);
+  const outSamples = Math.round((inSamples * 24000) / 16000);
+  const out = Buffer.alloc(outSamples * 2);
+  const outView = new DataView(out.buffer, out.byteOffset, out.length);
+  for (let i = 0; i < outSamples; i += 1) {
+    const pos = (i * 16000) / 24000;
+    const j = Math.floor(pos);
+    const frac = pos - j;
+    const s0 = view.getInt16(Math.min(j, inSamples - 1) * 2, true);
+    const s1 = view.getInt16(Math.min(j + 1, inSamples - 1) * 2, true);
+    outView.setInt16(i * 2, Math.round(s0 + (s1 - s0) * frac), true);
+  }
+  return out;
+}
+
+/**
  * Rebuild a canonical 44-byte-header WAV (standard PCM tag) from any WAV.
- * Pure-Node so the spike does not need ffmpeg for this input.
+ * Pure-Node so the spike does not need ffmpeg for this input. Used only by
+ * the retained (not needed) file-endpoint attempt.
  */
 function buildCanonicalWav(buffer: Buffer): Buffer {
   const found = findPcmData(buffer);
@@ -111,13 +144,15 @@ function buildCanonicalWav(buffer: Buffer): Buffer {
   return Buffer.concat([head, pcm]);
 }
 
-/** True when `ffmpeg` is on PATH (used only for conversion if needed). */
-function ffmpegAvailable(): Promise<boolean> {
-  return new Promise((resolve) => {
-    execFile('ffmpeg', ['-version'], (error) => {
-      resolve(error === null);
-    });
-  });
+/**
+ * Proxy agent for sandbox runs: raw DNS is blocked here while `fetch`
+ * works, so the `ws` client must go through the proxy when one is set.
+ * Outside the sandbox (no proxy env) the connection stays direct.
+ */
+function buildProxyAgent(): HttpsProxyAgent<string> | undefined {
+  const proxy = process.env['HTTPS_PROXY'] ?? process.env['https_proxy'];
+  if (proxy === undefined || proxy.trim() === '') return undefined;
+  return new HttpsProxyAgent(proxy);
 }
 
 /** Render a `ws` message payload as UTF-8 text. */
@@ -128,160 +163,277 @@ function rawDataToString(data: WebSocket.RawData): string {
   return Buffer.from(data).toString('utf8');
 }
 
+/** The first client frame: handshake JSON carrying the access token. */
+function buildHandshake(input: {
+  apiKey: string;
+  model: string;
+  languageBias: readonly string[];
+  keywords: readonly string[];
+}): string {
+  return JSON.stringify({
+    mode: 'ENDPOINTING',
+    authorization: { accessToken: input.apiKey },
+    audioEncoding: 'PCM_24KHZ',
+    model: input.model,
+    partialMode: 'CUMULATIVE',
+    emitAudioProgress: false,
+    languageBias: [...input.languageBias],
+    keywords: [...input.keywords],
+  });
+}
+
+/** `{sessionId}` reply that opens the audio gate (before any event). */
+const SessionReplySchema = z.object({ sessionId: z.string() }).passthrough();
+
+/** Server events after the handshake (`speechStart`, `transcript`, …). */
+const RealtimeEventSchema = z
+  .object({
+    type: z.string(),
+    // `turnId` arrives as a number (observed `0`); accept either shape.
+    turnId: z.union([z.string(), z.number()]).optional(),
+    transcript: z.string().optional(),
+    final: z.boolean().optional(),
+    audioProcessedMs: z.number().optional(),
+  })
+  .passthrough();
+
 interface SeenMessage {
   atMs: number;
   excerpt: string;
 }
 
 interface RealtimeOutcome {
+  label: string;
   connected: boolean;
   handshakeMs: number | null;
+  sessionId: string | null;
   sentChunks: number;
-  eosSignal: string;
+  audioBytes: number;
   seen: SeenMessage[];
+  partialCount: number;
   firstPartialMs: number | null;
-  finalMs: number | null;
+  speechCompleteMs: number | null;
+  closeMs: number | null;
+  closeCode: number | null;
+  closeReason: string;
   transcript: string | null;
-  detectedLanguage: string | null;
   error: string | null;
 }
 
-/** Pull a transcript-ish string and a language hint out of any JSON message. */
-function getStringField(record: Record<string, unknown>, key: string): string | null {
-  const value: unknown = record[key];
-  return typeof value === 'string' ? value : null;
+interface RunConfig {
+  label: string;
+  languageBias: readonly string[];
+  keywords: readonly string[];
 }
 
-function extractTranscript(message: unknown): {
-  text: string | null;
-  language: string | null;
-  isFinal: boolean;
-} {
-  if (typeof message === 'string') return { text: message, language: null, isFinal: false };
-  if (typeof message !== 'object' || message === null) {
-    return { text: null, language: null, isFinal: false };
-  }
-  const record: Record<string, unknown> = { ...message };
-  let text: string | null = null;
-  for (const key of ['transcript', 'text', 'hypothesis']) {
-    const candidate = getStringField(record, key);
-    if (candidate !== null) {
-      text = candidate;
-      break;
-    }
-  }
-  const language =
-    getStringField(record, 'language') ?? getStringField(record, 'detected_language');
-  const type = getStringField(record, 'type') ?? '';
-  const isFinal = type.includes('final') || record['is_final'] === true || record['final'] === true;
-  return { text, language, isFinal };
+interface RunReport extends RealtimeOutcome {
+  languageBias: string[];
+  keywords: string[];
+  wer: WerResult;
 }
 
-/** Stream PCM chunks over the realtime socket and record everything. */
-function tryRealtime(url: string, apiKey: string, pcm: Buffer): Promise<RealtimeOutcome> {
+/**
+ * One realtime run: handshake, wait for `{sessionId}`, stream 4,800-byte
+ * (100 ms) PCM16 24 kHz frames paced in real time, end with
+ * `{"type":"endStream"}`, and record everything until the server closes.
+ */
+function tryRealtime(input: {
+  url: string;
+  apiKey: string;
+  model: string;
+  pcm24k: Buffer;
+  config: RunConfig;
+}): Promise<RealtimeOutcome> {
+  const CHUNK = 4800;
+  const PACED_MS = 100;
   return new Promise((resolve) => {
     const outcome: RealtimeOutcome = {
+      label: input.config.label,
       connected: false,
       handshakeMs: null,
+      sessionId: null,
       sentChunks: 0,
-      eosSignal: 'json {type:end_of_stream} + socket close (write end)',
+      audioBytes: input.pcm24k.length,
       seen: [],
+      partialCount: 0,
       firstPartialMs: null,
-      finalMs: null,
+      speechCompleteMs: null,
+      closeMs: null,
+      closeCode: null,
+      closeReason: '',
       transcript: null,
-      detectedLanguage: null,
       error: null,
     };
     const started = Date.now();
     const atMs = (): number => Date.now() - started;
+    let agent: HttpsProxyAgent<string> | undefined;
+    try {
+      agent = buildProxyAgent();
+    } catch (error: unknown) {
+      outcome.error = error instanceof Error ? error.message : String(error);
+      resolve(outcome);
+      return;
+    }
     let socket: WebSocket;
     try {
-      socket = new WebSocket(url, { headers: { Authorization: `Bearer ${apiKey}` } });
+      socket = agent === undefined ? new WebSocket(input.url) : new WebSocket(input.url, { agent });
     } catch (error: unknown) {
       outcome.error = error instanceof Error ? error.message : String(error);
       resolve(outcome);
       return;
     }
 
-    const finals: string[] = [];
+    let settled = false;
+    let audioStartedAt = 0;
+    let sessionSeen = false;
+    let pacing: NodeJS.Timeout | undefined;
+    let closeWait: NodeJS.Timeout | undefined;
+    const overall = setTimeout(() => {
+      finish();
+    }, 90_000);
+    if (typeof overall.unref === 'function') overall.unref();
+
     const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      if (pacing !== undefined) clearInterval(pacing);
+      if (closeWait !== undefined) clearTimeout(closeWait);
+      clearTimeout(overall);
       try {
-        socket.close();
+        // Terminate (not close): a dead socket can sit in CLOSING forever
+        // and keep the spike process alive; on a clean server close this
+        // is a no-op.
+        socket.terminate();
       } catch {
         // Already closed.
       }
-      const lastFinal = finals[finals.length - 1];
-      resolve({ ...outcome, transcript: lastFinal ?? outcome.transcript });
+      resolve(outcome);
     };
 
-    const overall = setTimeout(finish, 45_000);
-    let firstChunkAt = 0;
-
-    socket.on('open', () => {
-      outcome.connected = true;
+    /** Start pacing audio frames; called once `{sessionId}` arrives. */
+    const startAudio = (sessionId: string): void => {
+      if (sessionSeen) return;
+      sessionSeen = true;
+      outcome.sessionId = sessionId;
       outcome.handshakeMs = atMs();
-      logInfo(`${SPIKE}: realtime socket open in ${String(outcome.handshakeMs)}ms`);
-      // 20 ms PCM16 mono 16 kHz frames (640 bytes), paced in real time.
-      const CHUNK = 640;
+      logInfo(`${SPIKE}: [${input.config.label}] session in ${String(outcome.handshakeMs)}ms`);
       let offset = 0;
-      firstChunkAt = Date.now();
-      const timer = setInterval(() => {
+      let first = true;
+      pacing = setInterval(() => {
         if (socket.readyState !== WebSocket.OPEN) {
-          clearInterval(timer);
+          if (pacing !== undefined) clearInterval(pacing);
           return;
         }
-        if (offset >= pcm.length) {
-          clearInterval(timer);
+        if (first) {
+          first = false;
+          audioStartedAt = Date.now();
+        }
+        if (offset >= input.pcm24k.length) {
+          if (pacing !== undefined) clearInterval(pacing);
           try {
-            socket.send(JSON.stringify({ type: 'end_of_stream' }));
+            socket.send(JSON.stringify({ type: 'endStream' }));
           } catch {
-            // Server may not accept text frames; the close below still ends it.
+            // Send failure surfaces as socket error/close below.
           }
-          setTimeout(finish, 8_000);
+          closeWait = setTimeout(() => {
+            finish();
+          }, 15_000);
+          if (typeof closeWait.unref === 'function') closeWait.unref();
           return;
         }
-        const chunk = pcm.subarray(offset, offset + CHUNK);
+        const chunk = input.pcm24k.subarray(offset, offset + CHUNK);
         offset += chunk.length;
         outcome.sentChunks += 1;
         socket.send(chunk);
-      }, 20);
+      }, PACED_MS);
+    };
+
+    socket.on('open', () => {
+      outcome.connected = true;
+      try {
+        socket.send(
+          buildHandshake({
+            apiKey: input.apiKey,
+            model: input.model,
+            languageBias: input.config.languageBias,
+            keywords: input.config.keywords,
+          }),
+        );
+      } catch (error: unknown) {
+        outcome.error = error instanceof Error ? error.message : String(error);
+        finish();
+      }
     });
 
     socket.on('message', (data) => {
       const raw = rawDataToString(data);
-      let parsed: unknown = raw;
+      if (outcome.seen.length < 30) outcome.seen.push({ atMs: atMs(), excerpt: excerpt(raw, 300) });
+      let parsed: unknown = null;
       try {
-        parsed = JSON.parse(raw);
+        parsed = JSON.parse(raw) as unknown;
       } catch {
-        // Binary or plain-text frame: keep as-is.
+        return;
       }
-      const { text, language, isFinal } = extractTranscript(parsed);
-      if (outcome.seen.length < 20) outcome.seen.push({ atMs: atMs(), excerpt: excerpt(raw, 300) });
-      if (text !== null && text !== '') {
-        if (outcome.firstPartialMs === null) outcome.firstPartialMs = Date.now() - firstChunkAt;
-        if (isFinal) {
-          outcome.finalMs = Date.now() - firstChunkAt;
-          finals.push(text);
-          outcome.transcript = text;
-        } else if (outcome.transcript === null) {
-          outcome.transcript = text;
+      if (!sessionSeen) {
+        const session = SessionReplySchema.safeParse(parsed);
+        if (session.success) {
+          startAudio(session.data.sessionId);
+          return;
         }
-        if (language !== null) outcome.detectedLanguage = language;
-      } else if (language !== null && outcome.detectedLanguage === null) {
-        outcome.detectedLanguage = language;
+        const maybeError = RealtimeEventSchema.safeParse(parsed);
+        if (maybeError.success && maybeError.data.type === 'error') {
+          outcome.error = `handshake failed: ${excerpt(raw, 300)}`;
+          finish();
+        }
+        return;
+      }
+      const event = RealtimeEventSchema.safeParse(parsed);
+      if (!event.success) return;
+      const text = event.data.transcript ?? '';
+      switch (event.data.type) {
+        case 'speechStart':
+        case 'speechEnd':
+        case 'audioProgress':
+          break;
+        case 'transcript': {
+          if (text !== '') {
+            outcome.partialCount += 1;
+            if (outcome.firstPartialMs === null && audioStartedAt > 0) {
+              outcome.firstPartialMs = Date.now() - audioStartedAt;
+            }
+            // CUMULATIVE partials grow: the latest non-empty one is the
+            // best running hypothesis (`final:true` arrives with empty
+            // text and is ignored here).
+            if (event.data.final !== true) outcome.transcript = text;
+          }
+          break;
+        }
+        case 'speechComplete': {
+          if (text !== '') outcome.transcript = text;
+          if (audioStartedAt > 0) outcome.speechCompleteMs = Date.now() - audioStartedAt;
+          break;
+        }
+        case 'error': {
+          outcome.error = excerpt(raw, 300);
+          break;
+        }
+        default:
+          break;
       }
     });
 
     socket.on('error', (error) => {
-      outcome.error = error.message;
-      clearTimeout(overall);
+      if (outcome.error === null) outcome.error = error.message;
       finish();
     });
     socket.on('close', (code, reason) => {
+      outcome.closeCode = code;
+      outcome.closeReason = reason.toString('utf8').slice(0, 120);
+      if (audioStartedAt > 0) outcome.closeMs = Date.now() - audioStartedAt;
       logInfo(
-        `${SPIKE}: realtime socket closed code=${String(code)} reason=${reason.toString('utf8').slice(0, 120)}`,
+        `${SPIKE}: [${input.config.label}] socket closed code=${String(code)} ` +
+          `reason=${outcome.closeReason}`,
       );
-      clearTimeout(overall);
       finish();
     });
   });
@@ -291,8 +443,8 @@ interface FileOutcome {
   httpStatus: number | null;
   latencyMs: number;
   transcript: string | null;
-  detectedLanguage: string | null;
   excerpt: string;
+  note: string;
 }
 
 export async function runStt(): Promise<SpikeResult> {
@@ -313,135 +465,116 @@ export async function runStt(): Promise<SpikeResult> {
 
   const wav = readFileSync(wavPath);
   const format = readWavFormat(wav);
-  const hasFfmpeg = await ffmpegAvailable();
   const formatNote =
     format === null
       ? 'unknown'
       : `${String(format.channels)}ch ${String(format.sampleRate)}Hz ${String(format.bitsPerSample)}bit tag=${String(format.audioFormatTag)} ~${format.durationSec.toFixed(1)}s`;
+  logInfo(`${SPIKE}: wav ${String(wav.length)} bytes format=${formatNote}`);
+  // The socket needs raw PCM16 mono 24 kHz: strip the WAV header (chunk
+  // walk) and resample the 16 kHz input in Node (linear interpolation).
+  const pcm16k = findPcmData(wav)?.pcm ?? wav.subarray(44);
+  const pcm24k = resample16kTo24k(pcm16k);
   logInfo(
-    `${SPIKE}: wav ${String(wav.length)} bytes format=${formatNote} ffmpeg=${String(hasFfmpeg)}`,
+    `${SPIKE}: pcm16k bytes=${String(pcm16k.length)} -> pcm24k bytes=${String(pcm24k.length)} ` +
+      `(${(pcm24k.length / 4800).toFixed(1)} x 100ms frames)`,
   );
-  const needsConversion =
-    format === null ||
-    format.channels !== 1 ||
-    format.sampleRate !== 16000 ||
-    format.bitsPerSample !== 16;
-  if (needsConversion && !hasFfmpeg) {
+
+  // --- Realtime (confirmed protocol): twice ---------------------------------
+  const realtimeUrl = 'wss://api.meta.ai/v1/asr/realtime';
+  const configs: readonly RunConfig[] = [
+    { label: 'no-bias', languageBias: [], keywords: [] },
+    { label: 'es-bias', languageBias: ['es'], keywords: KEYWORDS },
+  ];
+  const runs: RunReport[] = [];
+  for (const config of configs) {
+    const runStarted = Date.now();
+    const realtime = await tryRealtime({
+      url: realtimeUrl,
+      apiKey: env.apiKey,
+      model: env.model,
+      pcm24k,
+      config,
+    });
+    const wer = wordErrorRate(REFERENCE_TEXT, realtime.transcript ?? '');
+    runs.push({
+      ...realtime,
+      languageBias: [...config.languageBias],
+      keywords: [...config.keywords],
+      wer,
+    });
+    appendCall({
+      ts: new Date().toISOString(),
+      spike: SPIKE,
+      model: env.model,
+      endpoint: realtimeUrl,
+      method: 'WS',
+      httpStatus: realtime.connected ? 101 : null,
+      latencyMs: Date.now() - runStarted,
+      note:
+        `realtime ${config.label} connected=${String(realtime.connected)} ` +
+        `chunks=${String(realtime.sentChunks)} partials=${String(realtime.partialCount)} ` +
+        `firstPartialMs=${String(realtime.firstPartialMs)} ` +
+        `speechCompleteMs=${String(realtime.speechCompleteMs)} closeMs=${String(realtime.closeMs)} ` +
+        `close=${String(realtime.closeCode)}`,
+    });
     logInfo(
-      `${SPIKE}: audio needs conversion but ffmpeg is unavailable; sending as-is and recording the result`,
+      `${SPIKE}: [${config.label}] connected=${String(realtime.connected)} ` +
+        `firstPartialMs=${String(realtime.firstPartialMs)} ` +
+        `speechCompleteMs=${String(realtime.speechCompleteMs)} closeMs=${String(realtime.closeMs)} ` +
+        `WER=${wer.wer.toFixed(3)} (${String(wer.errors)}/${String(wer.referenceWords)} words) ` +
+        `transcript=${JSON.stringify((realtime.transcript ?? '').slice(0, 160))} ` +
+        `error=${realtime.error ?? 'none'}`,
     );
   }
-  // The socket gets raw PCM16 frames (header located by chunk walk).
-  const pcm = findPcmData(wav)?.pcm ?? wav.subarray(44);
-  logInfo(`${SPIKE}: pcm bytes=${String(pcm.length)} (socket streams these)`);
 
-  // --- Realtime -------------------------------------------------------------
-  const wsBase = env.baseUrl.replace(/^http/, 'ws').replace(/\/$/, '');
-  const realtimeUrl = wsBase.endsWith('/asr/realtime') ? wsBase : `${wsBase}/asr/realtime`;
-  const realtimeStarted = Date.now();
-  const realtime = await tryRealtime(realtimeUrl, env.apiKey, pcm);
-  appendCall({
-    ts: new Date().toISOString(),
-    spike: SPIKE,
-    model: env.model,
-    endpoint: realtimeUrl,
-    method: 'WS',
-    httpStatus: realtime.connected ? 101 : null,
-    latencyMs: Date.now() - realtimeStarted,
-    note: `connected=${String(realtime.connected)} chunks=${String(realtime.sentChunks)}`,
-  });
-  logInfo(
-    `${SPIKE}: realtime connected=${String(realtime.connected)} ` +
-      `firstPartialMs=${String(realtime.firstPartialMs)} finalMs=${String(realtime.finalMs)} ` +
-      `lang=${realtime.detectedLanguage ?? 'n/a'} error=${realtime.error ?? 'none'}`,
-  );
-
-  // --- File endpoint ----------------------------------------------------------
-  // The server's own 400-errors guided the shape: parts must be named
-  // `request` (JSON) + `audio` (binary), and `request` must carry
-  // camelCase `audioEncoding`. Every attempt is logged separately.
+  // --- File endpoint: not needed (realtime works) ----------------------------
+  // Kept as one attempt for the record only.
   const fileUrl = env.baseUrl.endsWith('/v1')
     ? `${env.baseUrl}/asr/transcribe`
     : `${env.baseUrl}/v1/asr/transcribe`;
-  const canonicalWav = buildCanonicalWav(wav);
-  const fileAttempts: Array<{
-    name: string;
-    requestJson: Record<string, unknown>;
-    audio: Buffer;
-    audioMime: string;
-    audioName: string;
-  }> = [
-    {
-      name: 'naive file+model+language',
-      requestJson: {},
-      audio: wav,
-      audioMime: 'audio/wav',
-      audioName: 'es-10s.wav',
-    },
-    {
-      name: 'request+audio original-wav',
-      requestJson: {
-        model: env.model,
-        language: 'es',
-        audioEncoding: 'LINEAR16',
-        sampleRateHertz: 16000,
-      },
-      audio: wav,
-      audioMime: 'audio/wav',
-      audioName: 'es-10s.wav',
-    },
-    {
-      name: 'request+audio canonical-wav',
-      requestJson: { language: 'es', audioEncoding: 'LINEAR16', sampleRateHertz: 16000 },
-      audio: canonicalWav,
-      audioMime: 'audio/wav',
-      audioName: 'es-10s.wav',
-    },
-  ];
   const fileOutcome: FileOutcome = {
     httpStatus: null,
     latencyMs: 0,
     transcript: null,
-    detectedLanguage: null,
     excerpt: '',
+    note: 'not needed: realtime works',
   };
-  for (const attempt of fileAttempts) {
+  {
     const fileStarted = Date.now();
     let bodyText = '';
     let status: number | null = null;
     try {
       const form = new FormData();
-      if (attempt.name === 'naive file+model+language') {
-        form.append(
-          'file',
-          new Blob([attempt.audio], { type: attempt.audioMime }),
-          attempt.audioName,
-        );
-        form.append('model', env.model);
-        form.append('language', 'es');
-      } else {
-        form.append(
-          'request',
-          new Blob([JSON.stringify(attempt.requestJson)], { type: 'application/json' }),
-          'request.json',
-        );
-        form.append(
-          'audio',
-          new Blob([attempt.audio], { type: attempt.audioMime }),
-          attempt.audioName,
-        );
-      }
+      form.append(
+        'request',
+        new Blob(
+          [
+            JSON.stringify({
+              model: env.model,
+              language: 'es',
+              audioEncoding: 'LINEAR16',
+              sampleRateHertz: 16000,
+            }),
+          ],
+          { type: 'application/json' },
+        ),
+        'request.json',
+      );
+      form.append('audio', new Blob([buildCanonicalWav(wav)], { type: 'audio/wav' }), 'es-10s.wav');
       const response = await fetch(fileUrl, {
         method: 'POST',
         headers: { Authorization: `Bearer ${env.apiKey}` },
         body: form,
+        signal: AbortSignal.timeout(30_000),
       });
       bodyText = await response.text();
       status = response.status;
     } catch (error: unknown) {
       bodyText = error instanceof Error ? `fetch-error: ${error.message}` : 'fetch-error';
     }
-    const attemptLatency = Date.now() - fileStarted;
+    fileOutcome.httpStatus = status;
+    fileOutcome.latencyMs = Date.now() - fileStarted;
+    fileOutcome.excerpt = excerpt(bodyText, 600);
     appendCall({
       ts: new Date().toISOString(),
       spike: SPIKE,
@@ -449,37 +582,13 @@ export async function runStt(): Promise<SpikeResult> {
       endpoint: fileUrl,
       method: 'POST',
       httpStatus: status,
-      latencyMs: attemptLatency,
-      note: `multipart ${attempt.name}`,
+      latencyMs: fileOutcome.latencyMs,
+      note: 'file request+audio canonical-wav (not needed: realtime works)',
     });
     logInfo(
-      `${SPIKE}: file ${attempt.name} HTTP ${String(status)} in ${String(attemptLatency)}ms: ${excerpt(bodyText, 220)}`,
+      `${SPIKE}: file HTTP ${String(status)} in ${String(fileOutcome.latencyMs)}ms: ${excerpt(bodyText, 220)}`,
     );
-    if (status !== null && status >= 200 && status < 300) {
-      fileOutcome.httpStatus = status;
-      fileOutcome.latencyMs = attemptLatency;
-      fileOutcome.excerpt = excerpt(bodyText, 600);
-      try {
-        const { text, language } = extractTranscript(JSON.parse(bodyText));
-        fileOutcome.transcript = text;
-        fileOutcome.detectedLanguage = language;
-      } catch {
-        fileOutcome.transcript = null;
-      }
-      break;
-    }
-    fileOutcome.httpStatus = status;
-    fileOutcome.latencyMs = attemptLatency;
-    fileOutcome.excerpt = excerpt(bodyText, 600);
   }
-
-  // --- WER ----------------------------------------------------------------------
-  const best = fileOutcome.transcript ?? realtime.transcript ?? '';
-  const wer = wordErrorRate(REFERENCE_TEXT, best);
-  logInfo(
-    `${SPIKE}: transcript=${JSON.stringify(best.slice(0, 200))} ` +
-      `WER=${wer.wer.toFixed(3)} (${String(wer.errors)}/${String(wer.referenceWords)} words)`,
-  );
 
   const outDir = join(FIXTURES_DIR, 'stt');
   mkdirSync(outDir, { recursive: true });
@@ -491,11 +600,11 @@ export async function runStt(): Promise<SpikeResult> {
         realtimeUrl,
         fileUrl,
         audioFormat: format,
-        ffmpegAvailable: hasFfmpeg,
-        realtime: { ...realtime, seen: realtime.seen },
-        file: fileOutcome,
+        resampledToHz: 24000,
+        frameBytes: 4800,
         referenceText: REFERENCE_TEXT,
-        wer,
+        runs,
+        file: fileOutcome,
       },
       null,
       2,
@@ -503,18 +612,22 @@ export async function runStt(): Promise<SpikeResult> {
     'utf8',
   );
 
-  if (best === '') {
+  const okRuns = runs.filter((run) => (run.transcript ?? '') !== '');
+  if (okRuns.length === 0) {
     return {
       spike: SPIKE,
       status: 'error',
-      detail: 'no transcript from realtime or file endpoint',
+      detail: 'no transcript from realtime runs or file endpoint',
     };
   }
-  return {
-    spike: SPIKE,
-    status: 'ok',
-    detail: `WER=${wer.wer.toFixed(3)} transcript=${JSON.stringify(best.slice(0, 120))}`,
-  };
+  const summary = runs
+    .map(
+      (run) =>
+        `${run.label} WER=${run.wer.wer.toFixed(3)} ` +
+        `(${String(run.wer.errors)}/${String(run.wer.referenceWords)})`,
+    )
+    .join(' | ');
+  return { spike: SPIKE, status: 'ok', detail: summary };
 }
 
 if (isDirectRun(import.meta.url)) {
