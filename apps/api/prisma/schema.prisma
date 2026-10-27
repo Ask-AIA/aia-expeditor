@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MANAGER
+  STATION
+}
+
+enum MeasureType {
+  UNIT
+  CONTAINER
+  WEIGHT
+  FILL
+}
+
+enum WeightUnit {
+  G
+  OZ
+  LB
+}
+
+enum OrderStatus {
+  DRAFT
+  READY_TO_PACK
+  PACKING
+  VERIFIED
+  DISPATCHED
+  CANCELLED
+}
+
+enum SessionState {
+  IDLE
+  PACKING
+  AWAITING_RECAPTURE
+  VERIFIED
+  DISPATCHED
+  ABANDONED
+}
+
+enum LineStatus {
+  PENDING
+  OK
+  SHORT
+  OVER
+  MISSING
+  WRONG_ITEM
+  UNSURE
+  OVERRIDDEN
+}
+
+enum OutboxStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+}
+
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  timeZone  String // IANA, e.g. "America/New_York"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  containerTypes ContainerType[]
+  catalogItems   CatalogItem[]
+  orders         Order[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  restaurantId String
+  email        String    @unique
+  name         String
+  passwordHash String // bcrypt, cost 12. Never store plain text.
+  role         Role
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([restaurantId])
+}
+
+model RefreshToken {
+  id            String    @id @default(cuid())
+  userId        String
+  familyId      String
+  tokenHash     String    @unique // SHA-256 of the opaque token
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokedReason String?
+  replacedById  String?   @unique
+  userAgent     String?
+  ip            String?
+  lastUsedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy RefreshToken? @relation("Rotation", fields: [replacedById], references: [id])
+  replaces   RefreshToken? @relation("Rotation")
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique // SHA-256
+  expiresAt DateTime
+  usedAt    DateTime?
+  requestIp String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ContainerType {
+  id              String   @id @default(cuid())
+  restaurantId    String
+  name            String // "Half pan (aluminum)"
+  samConcept      String // short noun phrase for SAM, e.g. "aluminum tray"
+  tareGrams       Int // learned or configured empty weight
+  nominalVolumeMl Int?
+  createdAt       DateTime @default(now())
+
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  catalogItems CatalogItem[]
+
+  @@unique([restaurantId, name])
+}
+
+model CatalogItem {
+  id              String      @id @default(cuid())
+  restaurantId    String
+  name            String
+  measureType     MeasureType
+  containerTypeId String?
+  samConcept      String? // for UNIT items without a container, e.g. "sauce cup"
+  standardGrams   Int? // WEIGHT: grams per ordered unit
+  minFillLevel    Float? // FILL: 0..1
+  toleranceUnder  Float       @default(0.05)
+  toleranceOver   Float       @default(0.25)
+  lidLabelAliases String[] // texts packers write on lids
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id])
+  containerType ContainerType? @relation(fields: [containerTypeId], references: [id])
+  orderLines    OrderLine[]
+  exemplars     ItemExemplar[]
+
+  @@unique([restaurantId, name])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  restaurantId  String
+  reference     String // human-friendly, e.g. "EXP-1042"
+  customerName  String
+  customerEmail String
+  guests        Int
+  eventAt       DateTime
+  notes         String?
+  status        OrderStatus @default(DRAFT)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  restaurant Restaurant            @relation(fields: [restaurantId], references: [id])
+  lines      OrderLine[]
+  sessions   VerificationSession[]
+
+  @@unique([restaurantId, reference])
+  @@index([restaurantId, status])
+}
+
+model OrderLine {
+  id            String      @id @default(cuid())
+  orderId       String
+  catalogItemId String
+  quantity      Float // units, containers, or weight in `weightUnit`
+  weightUnit    WeightUnit?
+  position      Int
+
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  catalogItem CatalogItem @relation(fields: [catalogItemId], references: [id])
+  checks      LineCheck[]
+
+  @@index([orderId])
+}
+
+model VerificationSession {
+  id              String       @id @default(cuid())
+  orderId         String
+  startedById     String
+  state           SessionState @default(IDLE)
+  startedAt       DateTime     @default(now())
+  verifiedAt      DateTime?
+  dispatchedAt    DateTime?
+  dispatchedById  String?
+  abandonedReason String?
+  finalPhotoKey   String?
+  version         Int          @default(0) // optimistic locking
+
+  order      Order               @relation(fields: [orderId], references: [id])
+  frames     Frame[]
+  detections Detection[]
+  checks     LineCheck[]
+  recaptures RecaptureRequest[]
+  receipt    Receipt?
+
+  @@index([orderId])
+}
+
+model Frame {
+  id          String   @id @default(cuid())
+  sessionId   String
+  storageKey  String
+  width       Int
+  height      Int
+  trigger     String // "motion" | "heartbeat" | "recapture" | "final"
+  capturedAt  DateTime
+  processedAt DateTime?
+  latencyMs   Int?
+
+  session    VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  detections Detection[]
+
+  @@index([sessionId])
+}
+
+model Detection {
+  id            String   @id @default(cuid())
+  sessionId     String
+  frameId       String
+  trackKey      String // stable key across frames (see §11.3)
+  concept       String // SAM concept that produced it
+  boxX1         Int
+  boxY1         Int
+  boxX2         Int
+  boxY2         Int
+  maskKey       String? // stored decoded mask PNG
+  samConfidence Float?
+  catalogItemId String? // identification result
+  idConfidence  Float?
+  lidLabelText  String?
+  weightGrams   Int?
+  fillLevel     Float?
+  createdAt     DateTime @default(now())
+
+  session VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  frame   Frame               @relation(fields: [frameId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, trackKey])
+}
+
+model LineCheck {
+  id             String     @id @default(cuid())
+  sessionId      String
+  orderLineId    String
+  status         LineStatus @default(PENDING)
+  measured       Float? // count, grams, or fill level depending on measure type
+  expected       Float
+  detail         String? // human-readable reason
+  evidenceKeys   String[] // crop images
+  overriddenById String?
+  overrideReason String?
+  updatedAt      DateTime   @updatedAt
+
+  session   VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  orderLine OrderLine           @relation(fields: [orderLineId], references: [id])
+
+  @@unique([sessionId, orderLineId])
+}
+
+model RecaptureRequest {
+  id          String    @id @default(cuid())
+  sessionId   String
+  orderLineId String?
+  trackKey    String?
+  instruction String // e.g. "Lift the lid of the tray on the left"
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  session VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Receipt {
+  id         String   @id @default(cuid())
+  sessionId  String   @unique
+  publicSlug String   @unique // 22+ chars, URL-safe, unguessable
+  sentAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  session VerificationSession @relation(fields: [sessionId], references: [id])
+}
+
+model ItemExemplar {
+  id            String   @id @default(cuid())
+  catalogItemId String
+  imageKey      String // crop image
+  source        String // "taught" | "correction"
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  catalogItem CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+
+  @@index([catalogItemId])
+}
+
+model Correction {
+  id              String   @id @default(cuid())
+  sessionId       String
+  detectionId     String
+  predictedItemId String?
+  correctedItemId String
+  correctedById   String
+  spokenText      String? // when the correction came from voice
+  createdAt       DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+model EmailOutbox {
+  id            String       @id @default(cuid())
+  dedupeKey     String       @unique // e.g. "receipt:<sessionId>"
+  toAddress     String
+  template      String
+  payload       Json
+  status        OutboxStatus @default(PENDING)
+  attempts      Int          @default(0)
+  nextAttemptAt DateTime     @default(now())
+  lastError     String?
+  sentAt        DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([status, nextAttemptAt])
+}
+
+model ProviderCallLog {
+  id        String   @id @default(cuid())
+  provider  String // "meta" | "baseten" | "elevenlabs"
+  model     String
+  operation String // "segment" | "identify" | "read-scale" | "fill" | "stt" | "tts" | "intent"
+  latencyMs Int
+  ok        Boolean
+  errorCode String?
+  units     Int? // frames, tokens, or characters, for cost estimates
+  createdAt DateTime @default(now())
+
+  @@index([provider, operation, createdAt])
+}
