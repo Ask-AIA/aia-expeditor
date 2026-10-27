@@ -72,7 +72,12 @@ export const envSchema = z.object({
 
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
-  SMTP_SECURE: z.coerce.boolean().default(false),
+  // Never `z.coerce.boolean()`: `Boolean('false')` is `true`, so the shipped
+  // `SMTP_SECURE=false` would silently enable TLS.
+  SMTP_SECURE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().min(1).default('AIA Expeditor <no-reply@example.com>'),
