@@ -106,6 +106,7 @@ describe('PrismaUnitOfWork (integration)', () => {
       throw new Error('test module not initialized');
     }
     const order = new TestOrder(rowId('commit'));
+    order.place();
 
     await uow.run(async () => {
       await insertRestaurant(order.id);
@@ -123,6 +124,7 @@ describe('PrismaUnitOfWork (integration)', () => {
       throw new Error('test module not initialized');
     }
     const order = new TestOrder(rowId('rollback'));
+    order.place();
 
     await expect(
       uow.run(async () => {
@@ -142,6 +144,8 @@ describe('PrismaUnitOfWork (integration)', () => {
     }
     const outer = new TestOrder(rowId('outer'));
     const inner = new TestOrder(rowId('inner'));
+    outer.place();
+    inner.place();
 
     await uow.run(async () => {
       await insertRestaurant(outer.id);
@@ -162,12 +166,16 @@ describe('PrismaUnitOfWork (integration)', () => {
     }
     const outer = new TestOrder(rowId('outer-fail'));
     const inner = new TestOrder(rowId('inner-fail'));
+    outer.place();
+    inner.place();
 
     await expect(
       uow.run(async () => {
         await insertRestaurant(outer.id);
+        uow?.addEvents(outer.pullEvents());
         await uow?.run(async () => {
           await insertRestaurant(inner.id);
+          uow?.addEvents(inner.pullEvents());
           throw new Error('inner failure');
         });
       }),
