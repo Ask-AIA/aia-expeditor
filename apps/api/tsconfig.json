@@ -6,9 +6,8 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*.ts", "prisma.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
