@@ -14,6 +14,7 @@
     "lint:boundaries-test": "node tools/lint-fixtures/verify-boundaries.mjs",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
+    "test:int": "pnpm --filter api test:int",
     "setup": "node -e \"console.log('setup wizard: not implemented yet (Phase 4)')\"",
     "doctor": "node -e \"console.log('doctor: not implemented yet (Phase 4)')\"",
     "eval": "node -e \"console.log('eval harness: not implemented yet (Phase 11)')\"",
