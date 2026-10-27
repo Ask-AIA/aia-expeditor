@@ -8,6 +8,7 @@
     "build": "nest build",
     "start": "node dist/main",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prisma": "prisma",
     "test": "jest --silent",
     "test:int": "NODE_ENV=test jest --silent --config jest.int.config.js",
     "postinstall": "prisma generate"
