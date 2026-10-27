@@ -20,8 +20,9 @@ export abstract class BaseUseCase<TInput, TOutput> {
   /**
    * Validate the input before execution. Return a `DomainError` to
    * reject the input without running `execute`, or `null` when valid.
+   * The default accepts everything; override for cheap synchronous checks.
    */
-  protected validate(): DomainError | null {
+  protected validate(_input: TInput): DomainError | null {
     return null;
   }
 
@@ -41,7 +42,7 @@ export abstract class BaseUseCase<TInput, TOutput> {
 
   async run(input: TInput): Promise<Result<TOutput, DomainError>> {
     const useCaseName = this.constructor.name;
-    const invalid = this.validate();
+    const invalid = this.validate(input);
     if (invalid !== null) {
       this.logger.warn(`${useCaseName} input validation failed`, {
         useCase: useCaseName,

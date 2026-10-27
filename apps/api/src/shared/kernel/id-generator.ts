@@ -31,7 +31,8 @@ function uuidV7(nowMs: number, bytes: Uint8Array): string {
     rand = (rand << 8n) | BigInt(bytes[i] ?? 0);
   }
   const randA = (rand >> 62n) & 0xfffn;
-  const randB = (rand & ((1n << 62n) - 1n)) | (0b10n << 60n);
+  // Variant field is the top two bits of the 64-bit rand_b half: `10`.
+  const randB = (rand & ((1n << 62n) - 1n)) | (0b10n << 62n);
   const randBHigh = (randB >> 48n) & 0xffffn;
   const randBLow = randB & 0xffffffffffffn;
 

@@ -20,34 +20,40 @@ function deepEqual(a: unknown, b: unknown): boolean {
   return false;
 }
 
-function deepFreeze<T>(value: T): T {
+/**
+ * Deep-clone `value` and freeze the clone, so the value object owns
+ * immutable props without freezing (or aliasing) the caller's input.
+ */
+function deepClone<T>(value: T): T {
   if (Array.isArray(value)) {
+    const copy: unknown[] = [];
     for (const item of value) {
-      deepFreeze(item);
+      copy.push(deepClone(item));
     }
-    Object.freeze(value);
-    return value;
+    return Object.freeze(copy) as T;
   }
-  if (isRecord(value) || value instanceof Date) {
-    if (isRecord(value)) {
-      for (const key of Object.keys(value)) {
-        deepFreeze(value[key]);
-      }
+  if (value instanceof Date) {
+    return Object.freeze(new Date(value.getTime())) as T;
+  }
+  if (isRecord(value)) {
+    const copy: Record<string, unknown> = {};
+    for (const key of Object.keys(value)) {
+      copy[key] = deepClone(value[key]);
     }
-    Object.freeze(value);
+    return Object.freeze(copy) as T;
   }
   return value;
 }
 
 /**
  * Base class for value objects: immutable values with structural equality.
- * Props are deep-frozen at construction; equality compares by value.
+ * Props are deep-cloned and frozen at construction; equality compares by value.
  */
 export abstract class ValueObject<TProps> {
   readonly props: TProps;
 
   protected constructor(props: TProps) {
-    this.props = deepFreeze({ ...(props as Record<string, unknown>) }) as TProps;
+    this.props = deepClone(props);
   }
 
   equals(other: unknown): boolean {
