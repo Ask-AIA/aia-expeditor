@@ -1,0 +1,39 @@
+{
+  "model": "muse-voice-transcribe-1.0",
+  "realtimeUrl": "wss://api.meta.ai/v1/asr/realtime",
+  "fileUrl": "https://api.meta.ai/v1/asr/transcribe",
+  "audioFormat": {
+    "channels": 1,
+    "sampleRate": 16000,
+    "bitsPerSample": 16,
+    "audioFormatTag": 65534,
+    "durationSec": 8.4253125
+  },
+  "ffmpegAvailable": false,
+  "realtime": {
+    "connected": false,
+    "handshakeMs": null,
+    "sentChunks": 0,
+    "eosSignal": "json {type:end_of_stream} + socket close (write end)",
+    "seen": [],
+    "firstPartialMs": null,
+    "finalMs": null,
+    "transcript": null,
+    "detectedLanguage": null,
+    "error": "getaddrinfo ENOTFOUND api.meta.ai"
+  },
+  "file": {
+    "httpStatus": 400,
+    "latencyMs": 252,
+    "transcript": null,
+    "detectedLanguage": null,
+    "excerpt": "{\"sessionId\":\"voyager/transcribe/4427C518A19F46B5AB584C5A4A27E698\",\"error\":{\"code\":null,\"param\":null,\"type\":\"invalid_request_error\",\"message\":\"Malformed request\"}}"
+  },
+  "referenceText": "Listo, ya metí las dos bandejas de pollo y una de arroz. Me faltan los tenedores y cuatro vasos. ¿Cuántas ensaladas lleva este pedido?",
+  "wer": {
+    "wer": 1,
+    "errors": 24,
+    "referenceWords": 24,
+    "hypothesisWords": 0
+  }
+}

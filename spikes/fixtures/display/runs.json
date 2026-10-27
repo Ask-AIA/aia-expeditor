@@ -1,0 +1,37 @@
+{
+  "readings": [
+    {
+      "value": 1.24,
+      "unit": "kg",
+      "confidence": 0.99
+    },
+    {
+      "value": 1.24,
+      "unit": "kg",
+      "confidence": 0.99
+    },
+    {
+      "value": 1.24,
+      "unit": "kg",
+      "confidence": 0.99
+    },
+    {
+      "value": 1.24,
+      "unit": "kg",
+      "confidence": 0.99
+    },
+    {
+      "value": 1.24,
+      "unit": "kg",
+      "confidence": 0.99
+    }
+  ],
+  "latencies": [2121, 3509, 2282, 2673, 2583],
+  "rawExcerpts": [
+    "{\"value\": 1.24, \"unit\": \"kg\", \"confidence\": 0.99}",
+    "{\"value\":1.24,\"unit\":\"kg\",\"confidence\":0.99}",
+    "{\"value\": 1.24, \"unit\": \"kg\", \"confidence\": 0.99}",
+    "{\"value\": 1.24, \"unit\": \"kg\", \"confidence\": 0.99}",
+    "{\"value\": 1.24, \"unit\": \"kg\", \"confidence\": 0.99}"
+  ]
+}

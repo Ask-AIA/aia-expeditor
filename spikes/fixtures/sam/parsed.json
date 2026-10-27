@@ -1,0 +1,1556 @@
+[
+  {
+    "photo": "01",
+    "concept": "cup",
+    "encoding": "one_bit",
+    "count": 4,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 52,
+        "y1": 117,
+        "x2": 237,
+        "y2": 316,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "1",
+        "x1": 407,
+        "y1": 120,
+        "x2": 563,
+        "y2": 320,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "2",
+        "x1": 231,
+        "y1": 122,
+        "x2": 394,
+        "y2": 321,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "3",
+        "x1": 582,
+        "y1": 124,
+        "x2": 737,
+        "y2": 322,
+        "confidence": 0.8202247023582458
+      }
+    ],
+    "maskPayloadLens": [143, 144, 144, 143],
+    "maskDims": [
+      {
+        "h": 200,
+        "w": 186,
+        "enc": "!"
+      },
+      {
+        "h": 201,
+        "w": 157,
+        "enc": "!"
+      },
+      {
+        "h": 200,
+        "w": 164,
+        "enc": "!"
+      },
+      {
+        "h": 199,
+        "w": 156,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 143,
+        "expectedOneBit": 4650,
+        "expectedBytePerPixel": 37200,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 144,
+        "expectedOneBit": 3945,
+        "expectedBytePerPixel": 31557,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "cup",
+    "encoding": "lossless",
+    "count": 4,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 52,
+        "y1": 117,
+        "x2": 237,
+        "y2": 316,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "1",
+        "x1": 407,
+        "y1": 120,
+        "x2": 563,
+        "y2": 320,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "2",
+        "x1": 231,
+        "y1": 122,
+        "x2": 394,
+        "y2": 321,
+        "confidence": 0.8202247023582458
+      },
+      {
+        "objectId": "3",
+        "x1": 582,
+        "y1": 124,
+        "x2": 737,
+        "y2": 322,
+        "confidence": 0.8202247023582458
+      }
+    ],
+    "maskPayloadLens": [3768, 3122, 3092, 3940],
+    "maskDims": [
+      {
+        "h": 200,
+        "w": 186,
+        "enc": "~"
+      },
+      {
+        "h": 201,
+        "w": 157,
+        "enc": "~"
+      },
+      {
+        "h": 200,
+        "w": 164,
+        "enc": "~"
+      },
+      {
+        "h": 199,
+        "w": 156,
+        "enc": "~"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 3768,
+        "expectedOneBit": 4650,
+        "expectedBytePerPixel": 37200,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 3122,
+        "expectedOneBit": 3945,
+        "expectedBytePerPixel": 31557,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "plate",
+    "encoding": "one_bit",
+    "count": 3,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 970,
+        "y1": 435,
+        "x2": 1289,
+        "y2": 742,
+        "confidence": 0.9569892287254333
+      },
+      {
+        "objectId": "1",
+        "x1": 146,
+        "y1": 418,
+        "x2": 482,
+        "y2": 732,
+        "confidence": 0.9609756469726562
+      },
+      {
+        "objectId": "2",
+        "x1": 564,
+        "y1": 434,
+        "x2": 880,
+        "y2": 740,
+        "confidence": 0.9569892287254333
+      }
+    ],
+    "maskPayloadLens": [238, 247, 233],
+    "maskDims": [
+      {
+        "h": 308,
+        "w": 320,
+        "enc": "!"
+      },
+      {
+        "h": 315,
+        "w": 337,
+        "enc": "!"
+      },
+      {
+        "h": 307,
+        "w": 317,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 238,
+        "expectedOneBit": 12320,
+        "expectedBytePerPixel": 98560,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 247,
+        "expectedOneBit": 13270,
+        "expectedBytePerPixel": 106155,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "plate",
+    "encoding": "lossless",
+    "count": 3,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 970,
+        "y1": 435,
+        "x2": 1289,
+        "y2": 742,
+        "confidence": 0.9569892287254333
+      },
+      {
+        "objectId": "1",
+        "x1": 146,
+        "y1": 418,
+        "x2": 482,
+        "y2": 732,
+        "confidence": 0.9609756469726562
+      },
+      {
+        "objectId": "2",
+        "x1": 564,
+        "y1": 434,
+        "x2": 880,
+        "y2": 740,
+        "confidence": 0.9569892287254333
+      }
+    ],
+    "maskPayloadLens": [9748, 10279, 8713],
+    "maskDims": [
+      {
+        "h": 308,
+        "w": 320,
+        "enc": "~"
+      },
+      {
+        "h": 315,
+        "w": 337,
+        "enc": "~"
+      },
+      {
+        "h": 307,
+        "w": 317,
+        "enc": "~"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 9748,
+        "expectedOneBit": 12320,
+        "expectedBytePerPixel": 98560,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 10279,
+        "expectedOneBit": 13270,
+        "expectedBytePerPixel": 106155,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "fork",
+    "encoding": "one_bit",
+    "count": 6,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 626,
+        "y1": 760,
+        "x2": 670,
+        "y2": 1045,
+        "confidence": 0.9452055096626282
+      },
+      {
+        "objectId": "1",
+        "x1": 1077,
+        "y1": 766,
+        "x2": 1125,
+        "y2": 1047,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "2",
+        "x1": 279,
+        "y1": 763,
+        "x2": 328,
+        "y2": 1053,
+        "confidence": 0.9532163739204407
+      },
+      {
+        "objectId": "3",
+        "x1": 457,
+        "y1": 764,
+        "x2": 503,
+        "y2": 1052,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "4",
+        "x1": 788,
+        "y1": 758,
+        "x2": 833,
+        "y2": 1042,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "5",
+        "x1": 925,
+        "y1": 762,
+        "x2": 973,
+        "y2": 1045,
+        "confidence": 0.941605806350708
+      }
+    ],
+    "maskPayloadLens": [95, 100, 117, 109, 102, 123],
+    "maskDims": [
+      {
+        "h": 286,
+        "w": 45,
+        "enc": "!"
+      },
+      {
+        "h": 282,
+        "w": 49,
+        "enc": "!"
+      },
+      {
+        "h": 291,
+        "w": 50,
+        "enc": "!"
+      },
+      {
+        "h": 289,
+        "w": 47,
+        "enc": "!"
+      },
+      {
+        "h": 285,
+        "w": 46,
+        "enc": "!"
+      },
+      {
+        "h": 284,
+        "w": 49,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 95,
+        "expectedOneBit": 1609,
+        "expectedBytePerPixel": 12870,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 100,
+        "expectedOneBit": 1728,
+        "expectedBytePerPixel": 13818,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "fork",
+    "encoding": "lossless",
+    "count": 6,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 626,
+        "y1": 760,
+        "x2": 670,
+        "y2": 1045,
+        "confidence": 0.9452055096626282
+      },
+      {
+        "objectId": "1",
+        "x1": 1077,
+        "y1": 766,
+        "x2": 1125,
+        "y2": 1047,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "2",
+        "x1": 279,
+        "y1": 763,
+        "x2": 328,
+        "y2": 1053,
+        "confidence": 0.9532163739204407
+      },
+      {
+        "objectId": "3",
+        "x1": 457,
+        "y1": 764,
+        "x2": 503,
+        "y2": 1052,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "4",
+        "x1": 788,
+        "y1": 758,
+        "x2": 833,
+        "y2": 1042,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "5",
+        "x1": 925,
+        "y1": 762,
+        "x2": 973,
+        "y2": 1045,
+        "confidence": 0.941605806350708
+      }
+    ],
+    "maskPayloadLens": [2098, 1985, 2485, 2238, 1890, 2130],
+    "maskDims": [
+      {
+        "h": 286,
+        "w": 45,
+        "enc": "~"
+      },
+      {
+        "h": 282,
+        "w": 49,
+        "enc": "~"
+      },
+      {
+        "h": 291,
+        "w": 50,
+        "enc": "~"
+      },
+      {
+        "h": 289,
+        "w": 47,
+        "enc": "~"
+      },
+      {
+        "h": 285,
+        "w": 46,
+        "enc": "~"
+      },
+      {
+        "h": 284,
+        "w": 49,
+        "enc": "~"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 2098,
+        "expectedOneBit": 1609,
+        "expectedBytePerPixel": 12870,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 1985,
+        "expectedOneBit": 1728,
+        "expectedBytePerPixel": 13818,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "aluminum tray",
+    "encoding": "one_bit",
+    "count": 2,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 1089,
+        "y1": 78,
+        "x2": 1407,
+        "y2": 417,
+        "confidence": 0.5775577425956726
+      },
+      {
+        "objectId": "1",
+        "x1": 760,
+        "y1": 74,
+        "x2": 1069,
+        "y2": 416,
+        "confidence": 0.5775577425956726
+      }
+    ],
+    "maskPayloadLens": [367, 337],
+    "maskDims": [
+      {
+        "h": 340,
+        "w": 319,
+        "enc": "!"
+      },
+      {
+        "h": 343,
+        "w": 310,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 367,
+        "expectedOneBit": 13558,
+        "expectedBytePerPixel": 108460,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 337,
+        "expectedOneBit": 13292,
+        "expectedBytePerPixel": 106330,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "01",
+    "concept": "aluminum tray",
+    "encoding": "lossless",
+    "count": 2,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 1089,
+        "y1": 78,
+        "x2": 1407,
+        "y2": 417,
+        "confidence": 0.5775577425956726
+      },
+      {
+        "objectId": "1",
+        "x1": 760,
+        "y1": 74,
+        "x2": 1069,
+        "y2": 416,
+        "confidence": 0.5775577425956726
+      }
+    ],
+    "maskPayloadLens": [28727, 27980],
+    "maskDims": [
+      {
+        "h": 340,
+        "w": 319,
+        "enc": "~"
+      },
+      {
+        "h": 343,
+        "w": 310,
+        "enc": "~"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 28727,
+        "expectedOneBit": 13558,
+        "expectedBytePerPixel": 108460,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 27980,
+        "expectedOneBit": 13292,
+        "expectedBytePerPixel": 106330,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "02",
+    "concept": "cup",
+    "encoding": "one_bit",
+    "count": 4,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 225,
+        "y1": 443,
+        "x2": 401,
+        "y2": 636,
+        "confidence": 0.8324607610702515
+      },
+      {
+        "objectId": "1",
+        "x1": 91,
+        "y1": 568,
+        "x2": 279,
+        "y2": 744,
+        "confidence": 0.827957034111023
+      },
+      {
+        "objectId": "2",
+        "x1": 0,
+        "y1": 323,
+        "x2": 206,
+        "y2": 577,
+        "confidence": 0.6444444060325623
+      },
+      {
+        "objectId": "3",
+        "x1": 387,
+        "y1": 510,
+        "x2": 571,
+        "y2": 706,
+        "confidence": 0.8476190567016602
+      }
+    ],
+    "maskPayloadLens": [149, 140, 178, 154],
+    "maskDims": [
+      {
+        "h": 194,
+        "w": 177,
+        "enc": "!"
+      },
+      {
+        "h": 177,
+        "w": 189,
+        "enc": "!"
+      },
+      {
+        "h": 255,
+        "w": 207,
+        "enc": "!"
+      },
+      {
+        "h": 197,
+        "w": 185,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 149,
+        "expectedOneBit": 4293,
+        "expectedBytePerPixel": 34338,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 140,
+        "expectedOneBit": 4182,
+        "expectedBytePerPixel": 33453,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "02",
+    "concept": "plate",
+    "encoding": "one_bit",
+    "count": 2,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 99,
+        "y1": 753,
+        "x2": 428,
+        "y2": 1216,
+        "confidence": 0.6332378387451172
+      },
+      {
+        "objectId": "1",
+        "x1": 0,
+        "y1": 741,
+        "x2": 356,
+        "y2": 1186,
+        "confidence": 0.7419355511665344
+      }
+    ],
+    "maskPayloadLens": [404, 268],
+    "maskDims": [
+      {
+        "h": 464,
+        "w": 330,
+        "enc": "!"
+      },
+      {
+        "h": 446,
+        "w": 357,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 404,
+        "expectedOneBit": 19140,
+        "expectedBytePerPixel": 153120,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 268,
+        "expectedOneBit": 19903,
+        "expectedBytePerPixel": 159222,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "02",
+    "concept": "fork",
+    "encoding": "one_bit",
+    "count": 7,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 473,
+        "y1": 1022,
+        "x2": 779,
+        "y2": 1220,
+        "confidence": 0.7815700173377991
+      },
+      {
+        "objectId": "1",
+        "x1": 642,
+        "y1": 1016,
+        "x2": 928,
+        "y2": 1244,
+        "confidence": 0.8476190567016602
+      },
+      {
+        "objectId": "2",
+        "x1": 428,
+        "y1": 1052,
+        "x2": 718,
+        "y2": 1345,
+        "confidence": 0.8904109597206116
+      },
+      {
+        "objectId": "3",
+        "x1": 607,
+        "y1": 1027,
+        "x2": 916,
+        "y2": 1363,
+        "confidence": 0.6363636255264282
+      },
+      {
+        "objectId": "4",
+        "x1": 411,
+        "y1": 1187,
+        "x2": 766,
+        "y2": 1256,
+        "confidence": 0.6995305418968201
+      },
+      {
+        "objectId": "5",
+        "x1": 507,
+        "y1": 1228,
+        "x2": 594,
+        "y2": 1351,
+        "confidence": 0.7460317611694336
+      },
+      {
+        "objectId": "6",
+        "x1": 487,
+        "y1": 971,
+        "x2": 821,
+        "y2": 1190,
+        "confidence": 0.8202247023582458
+      }
+    ],
+    "maskPayloadLens": [165, 164, 159, 235, 182, 105, 189],
+    "maskDims": [
+      {
+        "h": 199,
+        "w": 307,
+        "enc": "!"
+      },
+      {
+        "h": 229,
+        "w": 287,
+        "enc": "!"
+      },
+      {
+        "h": 294,
+        "w": 291,
+        "enc": "!"
+      },
+      {
+        "h": 337,
+        "w": 310,
+        "enc": "!"
+      },
+      {
+        "h": 70,
+        "w": 356,
+        "enc": "!"
+      },
+      {
+        "h": 124,
+        "w": 88,
+        "enc": "!"
+      },
+      {
+        "h": 220,
+        "w": 335,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 165,
+        "expectedOneBit": 7637,
+        "expectedBytePerPixel": 61093,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 164,
+        "expectedOneBit": 8216,
+        "expectedBytePerPixel": 65723,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "02",
+    "concept": "aluminum tray",
+    "encoding": "one_bit",
+    "count": 3,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 529,
+        "y1": 528,
+        "x2": 1085,
+        "y2": 1039,
+        "confidence": 0.9609756469726562
+      },
+      {
+        "objectId": "1",
+        "x1": 643,
+        "y1": 142,
+        "x2": 1085,
+        "y2": 609,
+        "confidence": 0.9532163739204407
+      },
+      {
+        "objectId": "2",
+        "x1": 203,
+        "y1": 75,
+        "x2": 691,
+        "y2": 494,
+        "confidence": 0.9609756469726562
+      }
+    ],
+    "maskPayloadLens": [578, 479, 507],
+    "maskDims": [
+      {
+        "h": 512,
+        "w": 557,
+        "enc": "!"
+      },
+      {
+        "h": 468,
+        "w": 443,
+        "enc": "!"
+      },
+      {
+        "h": 420,
+        "w": 489,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 578,
+        "expectedOneBit": 35648,
+        "expectedBytePerPixel": 285184,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 479,
+        "expectedOneBit": 25916,
+        "expectedBytePerPixel": 207324,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "03",
+    "concept": "cup",
+    "encoding": "one_bit",
+    "count": 0,
+    "boxes": [],
+    "maskPayloadLens": [],
+    "maskDims": [],
+    "decodeChecks": []
+  },
+  {
+    "photo": "03",
+    "concept": "plate",
+    "encoding": "one_bit",
+    "count": 0,
+    "boxes": [],
+    "maskPayloadLens": [],
+    "maskDims": [],
+    "decodeChecks": []
+  },
+  {
+    "photo": "03",
+    "concept": "fork",
+    "encoding": "one_bit",
+    "count": 7,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 77,
+        "y1": 592,
+        "x2": 157,
+        "y2": 894,
+        "confidence": 0.9259259104728699
+      },
+      {
+        "objectId": "1",
+        "x1": 120,
+        "y1": 593,
+        "x2": 199,
+        "y2": 895,
+        "confidence": 0.8827838897705078
+      },
+      {
+        "objectId": "2",
+        "x1": 170,
+        "y1": 593,
+        "x2": 249,
+        "y2": 893,
+        "confidence": 0.8904109597206116
+      },
+      {
+        "objectId": "3",
+        "x1": 219,
+        "y1": 596,
+        "x2": 284,
+        "y2": 895,
+        "confidence": 0.8904109597206116
+      },
+      {
+        "objectId": "4",
+        "x1": 364,
+        "y1": 594,
+        "x2": 419,
+        "y2": 896,
+        "confidence": 0.9024390578269958
+      },
+      {
+        "objectId": "5",
+        "x1": 315,
+        "y1": 594,
+        "x2": 372,
+        "y2": 895,
+        "confidence": 0.8987342119216919
+      },
+      {
+        "objectId": "6",
+        "x1": 266,
+        "y1": 594,
+        "x2": 329,
+        "y2": 895,
+        "confidence": 0.8632478713989258
+      }
+    ],
+    "maskPayloadLens": [118, 122, 137, 117, 118, 127, 117],
+    "maskDims": [
+      {
+        "h": 303,
+        "w": 81,
+        "enc": "!"
+      },
+      {
+        "h": 303,
+        "w": 80,
+        "enc": "!"
+      },
+      {
+        "h": 301,
+        "w": 80,
+        "enc": "!"
+      },
+      {
+        "h": 300,
+        "w": 66,
+        "enc": "!"
+      },
+      {
+        "h": 303,
+        "w": 56,
+        "enc": "!"
+      },
+      {
+        "h": 302,
+        "w": 58,
+        "enc": "!"
+      },
+      {
+        "h": 302,
+        "w": 64,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 118,
+        "expectedOneBit": 3068,
+        "expectedBytePerPixel": 24543,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 122,
+        "expectedOneBit": 3030,
+        "expectedBytePerPixel": 24240,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "03",
+    "concept": "aluminum tray",
+    "encoding": "one_bit",
+    "count": 2,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 50,
+        "y1": 76,
+        "x2": 727,
+        "y2": 509,
+        "confidence": 0.9179486632347107
+      },
+      {
+        "objectId": "1",
+        "x1": 746,
+        "y1": 79,
+        "x2": 1414,
+        "y2": 504,
+        "confidence": 0.9139785170555115
+      }
+    ],
+    "maskPayloadLens": [683, 972],
+    "maskDims": [
+      {
+        "h": 434,
+        "w": 678,
+        "enc": "!"
+      },
+      {
+        "h": 426,
+        "w": 669,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 683,
+        "expectedOneBit": 36782,
+        "expectedBytePerPixel": 294252,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 972,
+        "expectedOneBit": 35625,
+        "expectedBytePerPixel": 284994,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "04",
+    "concept": "cup",
+    "encoding": "one_bit",
+    "count": 5,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 560,
+        "y1": 508,
+        "x2": 714,
+        "y2": 689,
+        "confidence": 0.9259259104728699
+      },
+      {
+        "objectId": "1",
+        "x1": 1247,
+        "y1": 261,
+        "x2": 1311,
+        "y2": 512,
+        "confidence": 0.7770034670829773
+      },
+      {
+        "objectId": "2",
+        "x1": 811,
+        "y1": 358,
+        "x2": 947,
+        "y2": 531,
+        "confidence": 0.9375000596046448
+      },
+      {
+        "objectId": "3",
+        "x1": 697,
+        "y1": 425,
+        "x2": 838,
+        "y2": 584,
+        "confidence": 0.9259259104728699
+      },
+      {
+        "objectId": "4",
+        "x1": 578,
+        "y1": 347,
+        "x2": 722,
+        "y2": 509,
+        "confidence": 0.9336099624633789
+      }
+    ],
+    "maskPayloadLens": [138, 75, 133, 125, 128],
+    "maskDims": [
+      {
+        "h": 182,
+        "w": 155,
+        "enc": "!"
+      },
+      {
+        "h": 252,
+        "w": 65,
+        "enc": "!"
+      },
+      {
+        "h": 174,
+        "w": 137,
+        "enc": "!"
+      },
+      {
+        "h": 160,
+        "w": 142,
+        "enc": "!"
+      },
+      {
+        "h": 163,
+        "w": 145,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 138,
+        "expectedOneBit": 3527,
+        "expectedBytePerPixel": 28210,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": 60,
+        "payloadChars": 75,
+        "expectedOneBit": 2048,
+        "expectedBytePerPixel": 16380,
+        "alphabet": "rfc1924"
+      }
+    ]
+  },
+  {
+    "photo": "04",
+    "concept": "plate",
+    "encoding": "one_bit",
+    "count": 3,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 1006,
+        "y1": 509,
+        "x2": 1311,
+        "y2": 830,
+        "confidence": 0.9532163739204407
+      },
+      {
+        "objectId": "1",
+        "x1": 388,
+        "y1": 686,
+        "x2": 777,
+        "y2": 1075,
+        "confidence": 0.9569892287254333
+      },
+      {
+        "objectId": "2",
+        "x1": 230,
+        "y1": 419,
+        "x2": 573,
+        "y2": 720,
+        "confidence": 0.9532163739204407
+      }
+    ],
+    "maskPayloadLens": [337, 632, 492],
+    "maskDims": [
+      {
+        "h": 322,
+        "w": 306,
+        "enc": "!"
+      },
+      {
+        "h": 390,
+        "w": 390,
+        "enc": "!"
+      },
+      {
+        "h": 302,
+        "w": 344,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 337,
+        "expectedOneBit": 12317,
+        "expectedBytePerPixel": 98532,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 632,
+        "expectedOneBit": 19013,
+        "expectedBytePerPixel": 152100,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "04",
+    "concept": "fork",
+    "encoding": "one_bit",
+    "count": 8,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 836,
+        "y1": 578,
+        "x2": 866,
+        "y2": 767,
+        "confidence": 0.5586206912994385
+      },
+      {
+        "objectId": "1",
+        "x1": 873,
+        "y1": 584,
+        "x2": 969,
+        "y2": 899,
+        "confidence": 0.8709677457809448
+      },
+      {
+        "objectId": "2",
+        "x1": 1042,
+        "y1": 621,
+        "x2": 1311,
+        "y2": 714,
+        "confidence": 0.9375000596046448
+      },
+      {
+        "objectId": "3",
+        "x1": 436,
+        "y1": 745,
+        "x2": 696,
+        "y2": 1055,
+        "confidence": 0.949367105960846
+      },
+      {
+        "objectId": "4",
+        "x1": 758,
+        "y1": 603,
+        "x2": 799,
+        "y2": 898,
+        "confidence": 0.8865247964859009
+      },
+      {
+        "objectId": "5",
+        "x1": 242,
+        "y1": 557,
+        "x2": 480,
+        "y2": 808,
+        "confidence": 0.9452055096626282
+      },
+      {
+        "objectId": "6",
+        "x1": 793,
+        "y1": 580,
+        "x2": 849,
+        "y2": 879,
+        "confidence": 0.9101123809814453
+      },
+      {
+        "objectId": "7",
+        "x1": 863,
+        "y1": 592,
+        "x2": 908,
+        "y2": 799,
+        "confidence": 0.6717948913574219
+      }
+    ],
+    "maskPayloadLens": [74, 132, 102, 150, 102, 138, 117, 99],
+    "maskDims": [
+      {
+        "h": 190,
+        "w": 31,
+        "enc": "!"
+      },
+      {
+        "h": 316,
+        "w": 97,
+        "enc": "!"
+      },
+      {
+        "h": 94,
+        "w": 270,
+        "enc": "!"
+      },
+      {
+        "h": 311,
+        "w": 261,
+        "enc": "!"
+      },
+      {
+        "h": 296,
+        "w": 42,
+        "enc": "!"
+      },
+      {
+        "h": 252,
+        "w": 239,
+        "enc": "!"
+      },
+      {
+        "h": 300,
+        "w": 57,
+        "enc": "!"
+      },
+      {
+        "h": 208,
+        "w": 46,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 74,
+        "expectedOneBit": 737,
+        "expectedBytePerPixel": 5890,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 132,
+        "expectedOneBit": 3832,
+        "expectedBytePerPixel": 30652,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "04",
+    "concept": "aluminum tray",
+    "encoding": "one_bit",
+    "count": 3,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 96,
+        "y1": 56,
+        "x2": 522,
+        "y2": 438,
+        "confidence": 0.7852349281311035
+      },
+      {
+        "objectId": "1",
+        "x1": 814,
+        "y1": 52,
+        "x2": 1226,
+        "y2": 366,
+        "confidence": 0.8787879347801208
+      },
+      {
+        "objectId": "2",
+        "x1": 479,
+        "y1": 66,
+        "x2": 873,
+        "y2": 395,
+        "confidence": 0.8632478713989258
+      }
+    ],
+    "maskPayloadLens": [339, 509, 495],
+    "maskDims": [
+      {
+        "h": 383,
+        "w": 427,
+        "enc": "!"
+      },
+      {
+        "h": 315,
+        "w": 413,
+        "enc": "!"
+      },
+      {
+        "h": 330,
+        "w": 395,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 339,
+        "expectedOneBit": 20443,
+        "expectedBytePerPixel": 163541,
+        "alphabet": "none"
+      },
+      {
+        "decodedBytes": null,
+        "payloadChars": 509,
+        "expectedOneBit": 16262,
+        "expectedBytePerPixel": 130095,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "05",
+    "concept": "cup",
+    "encoding": "one_bit",
+    "count": 1,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 998,
+        "y1": 366,
+        "x2": 1330,
+        "y2": 669,
+        "confidence": 0.7500000596046448
+      }
+    ],
+    "maskPayloadLens": [248],
+    "maskDims": [
+      {
+        "h": 304,
+        "w": 333,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 248,
+        "expectedOneBit": 12654,
+        "expectedBytePerPixel": 101232,
+        "alphabet": "none"
+      }
+    ]
+  },
+  {
+    "photo": "05",
+    "concept": "plate",
+    "encoding": "one_bit",
+    "count": 0,
+    "boxes": [],
+    "maskPayloadLens": [],
+    "maskDims": [],
+    "decodeChecks": []
+  },
+  {
+    "photo": "05",
+    "concept": "fork",
+    "encoding": "one_bit",
+    "count": 0,
+    "boxes": [],
+    "maskPayloadLens": [],
+    "maskDims": [],
+    "decodeChecks": []
+  },
+  {
+    "photo": "05",
+    "concept": "aluminum tray",
+    "encoding": "one_bit",
+    "count": 1,
+    "boxes": [
+      {
+        "objectId": "0",
+        "x1": 137,
+        "y1": 250,
+        "x2": 868,
+        "y2": 760,
+        "confidence": 0.9139785170555115
+      }
+    ],
+    "maskPayloadLens": [320],
+    "maskDims": [
+      {
+        "h": 511,
+        "w": 732,
+        "enc": "!"
+      }
+    ],
+    "decodeChecks": [
+      {
+        "decodedBytes": null,
+        "payloadChars": 320,
+        "expectedOneBit": 46757,
+        "expectedBytePerPixel": 374052,
+        "alphabet": "none"
+      }
+    ]
+  }
+]
