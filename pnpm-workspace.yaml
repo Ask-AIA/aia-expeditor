@@ -2,10 +2,12 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'tools/*'
+  - 'spikes'
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   lefthook: true
+  sharp: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - '@typescript-eslint/eslint-plugin@8.72.1'

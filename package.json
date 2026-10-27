@@ -17,6 +17,13 @@
     "setup": "node -e \"console.log('setup wizard: not implemented yet (Phase 4)')\"",
     "doctor": "node -e \"console.log('doctor: not implemented yet (Phase 4)')\"",
     "eval": "node -e \"console.log('eval harness: not implemented yet (Phase 11)')\"",
+    "spikes": "pnpm --filter spikes run spikes",
+    "spike:1": "pnpm --filter spikes run spike:1",
+    "spike:2": "pnpm --filter spikes run spike:2",
+    "spike:3": "pnpm --filter spikes run spike:3",
+    "spike:4": "pnpm --filter spikes run spike:4",
+    "spike:5": "pnpm --filter spikes run spike:5",
+    "spike:6": "pnpm --filter spikes run spike:6",
     "prepare": "lefthook install"
   },
   "devDependencies": {
