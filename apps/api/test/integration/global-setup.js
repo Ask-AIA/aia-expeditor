@@ -7,8 +7,8 @@ const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 const dotenv = require('dotenv');
 
-const apiDir = path.resolve(__dirname, '..');
-const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
+const apiDir = path.resolve(__dirname, '..', '..');
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..', '..');
 
 module.exports = async () => {
   dotenv.config({ path: path.join(workspaceRoot, '.env') });

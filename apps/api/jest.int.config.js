@@ -2,8 +2,8 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/test'],
   testMatch: ['**/*.int-spec.ts'],
   testTimeout: 30000,
-  globalSetup: '<rootDir>/test/global-setup.js',
+  globalSetup: '<rootDir>/test/integration/global-setup.js',
 };

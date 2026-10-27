@@ -4,8 +4,8 @@ import { randomUUID } from 'node:crypto';
  * Point the test process at the isolated test dependencies.
  *
  * - `DATABASE_URL` is redirected to `DATABASE_URL_TEST`: the development
- *   database is never touched (`test/global-setup.js` applies migrations
- *   to the test database the same way).
+ *   database is never touched (`integration/global-setup.js` applies
+ *   migrations to the test database the same way).
  * - `REDIS_KEY_PREFIX` gets a per-run value (`exp:test:<uuid>:`), so keys
  *   written by one run can never collide with another project, another run,
  *   or a developer's local data on the shared Redis.

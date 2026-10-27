@@ -1,17 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
-import { AggregateRoot } from '../shared/kernel/aggregate-root';
-import { DomainEvent } from '../shared/kernel/domain-event';
-import { ConfigModule } from '../shared/config/config.module';
-import { DomainEventDispatcher } from '../shared/infrastructure/events/domain-event.dispatcher';
-import { PrismaUnitOfWork } from '../shared/infrastructure/persistence/prisma-unit-of-work';
-import { PrismaService } from '../shared/infrastructure/persistence/prisma.service';
+import { AggregateRoot } from '../../src/shared/kernel/aggregate-root';
+import { DomainEvent } from '../../src/shared/kernel/domain-event';
+import { ConfigModule } from '../../src/shared/config/config.module';
+import { DomainEventDispatcher } from '../../src/shared/infrastructure/events/domain-event.dispatcher';
+import { PrismaUnitOfWork } from '../../src/shared/infrastructure/persistence/prisma-unit-of-work';
+import { PrismaService } from '../../src/shared/infrastructure/persistence/prisma.service';
 import { useIsolatedTestEnv } from './test-env';
 
 /**
  * Integration coverage for the Prisma Unit of Work against the real test
- * database (migrated by `test/global-setup.js`):
+ * database (migrated by `integration/global-setup.js`):
  * commit really persists, rollback really reverts, and aggregate events
  * reach handlers only after the commit.
  *

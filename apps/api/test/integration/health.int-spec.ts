@@ -5,17 +5,17 @@ import type { TestingModule } from '@nestjs/testing';
 import type { Server } from 'node:http';
 import request from 'supertest';
 import type { Response } from 'supertest';
-import { ConfigModule } from '../shared/config/config.module';
-import { RedisService } from '../shared/infrastructure/persistence/redis.service';
-import { setupApiDocs } from '../shared/presentation/docs/api-docs';
-import { SharedModule } from '../shared/shared.module';
+import { ConfigModule } from '../../src/shared/config/config.module';
+import { RedisService } from '../../src/shared/infrastructure/persistence/redis.service';
+import { setupApiDocs } from '../../src/shared/presentation/docs/api-docs';
+import { SharedModule } from '../../src/shared/shared.module';
 import { useIsolatedTestEnv } from './test-env';
 
 /**
  * HTTP integration coverage for the Phase 2 foundation: the app boots
- * against the test database (migrated by `test/global-setup.js`) and a
- * per-run Redis prefix, `/api/v1/health` reports both dependencies, and
- * the correlation ID round-trips through the middleware.
+ * against the test database (migrated by `integration/global-setup.js`)
+ * and a per-run Redis prefix, `/api/v1/health` reports both
+ * dependencies, and the correlation ID round-trips through the middleware.
  */
 
 function serverOf(app: INestApplication): Server {
