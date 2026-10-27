@@ -150,6 +150,7 @@ vite.config.ts.timestamp-*
 
 # AIA Expeditor
 !.env.example
+!.env.test.example
 storage/
 eval/results/*.tmp
 docs/MUSE_CODE_SPEC.md
